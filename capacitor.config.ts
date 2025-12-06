@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.carvalhodasilva.fleetsteuer',
-  appName: 'fleet-steuer',
+  appName: 'Fleet Steuer',
   webDir: 'out'
 };
 

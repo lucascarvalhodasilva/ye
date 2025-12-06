@@ -7,11 +7,13 @@ export function AppProvider({ children }) {
   const [mealEntries, setMealEntries] = useState([]);
   const [mileageEntries, setMileageEntries] = useState([]);
   const [equipmentEntries, setEquipmentEntries] = useState([]);
-  const [stationDistance, setStationDistance] = useState(0);
-  const [employerRefundSettings, setEmployerRefundSettings] = useState({
-    thresholdHours: 8.5,
-    amount: 8.0,
-    mileageRefundRate: 0.30
+  const [expenseEntries, setExpenseEntries] = useState([]);
+  const [monthlyEmployerExpenses, setMonthlyEmployerExpenses] = useState([]);
+  const [defaultCommute, setDefaultCommute] = useState({
+    car: { active: true, distance: 0 },
+    motorcycle: { active: false, distance: 0 },
+    bike: { active: false, distance: 0 },
+    public_transport: { active: false, cost: '' }
   });
   const [taxRates, setTaxRates] = useState({
     mealRate8h: 14.0,
@@ -29,16 +31,18 @@ export function AppProvider({ children }) {
     const storedMeals = localStorage.getItem('mealEntries');
     const storedMileage = localStorage.getItem('mileageEntries');
     const storedEquipment = localStorage.getItem('equipmentEntries');
-    const storedStationDistance = localStorage.getItem('stationDistance');
-    const storedRefundSettings = localStorage.getItem('employerRefundSettings');
+    const storedExpenses = localStorage.getItem('expenseEntries');
+    const storedMonthlyExpenses = localStorage.getItem('monthlyEmployerExpenses');
+    const storedDefaultCommute = localStorage.getItem('defaultCommute');
     const storedTaxRates = localStorage.getItem('taxRates');
     const storedYear = localStorage.getItem('selectedYear');
 
     if (storedMeals) setMealEntries(JSON.parse(storedMeals));
     if (storedMileage) setMileageEntries(JSON.parse(storedMileage));
     if (storedEquipment) setEquipmentEntries(JSON.parse(storedEquipment));
-    if (storedStationDistance) setStationDistance(JSON.parse(storedStationDistance));
-    if (storedRefundSettings) setEmployerRefundSettings(JSON.parse(storedRefundSettings));
+    if (storedExpenses) setExpenseEntries(JSON.parse(storedExpenses));
+    if (storedMonthlyExpenses) setMonthlyEmployerExpenses(JSON.parse(storedMonthlyExpenses));
+    if (storedDefaultCommute) setDefaultCommute(JSON.parse(storedDefaultCommute));
     if (storedTaxRates) {
       const parsedRates = JSON.parse(storedTaxRates);
       setTaxRates(prev => ({ ...prev, ...parsedRates }));
@@ -60,12 +64,16 @@ export function AppProvider({ children }) {
   }, [equipmentEntries]);
 
   useEffect(() => {
-    localStorage.setItem('stationDistance', JSON.stringify(stationDistance));
-  }, [stationDistance]);
+    localStorage.setItem('expenseEntries', JSON.stringify(expenseEntries));
+  }, [expenseEntries]);
 
   useEffect(() => {
-    localStorage.setItem('employerRefundSettings', JSON.stringify(employerRefundSettings));
-  }, [employerRefundSettings]);
+    localStorage.setItem('monthlyEmployerExpenses', JSON.stringify(monthlyEmployerExpenses));
+  }, [monthlyEmployerExpenses]);
+
+  useEffect(() => {
+    localStorage.setItem('defaultCommute', JSON.stringify(defaultCommute));
+  }, [defaultCommute]);
 
   useEffect(() => {
     localStorage.setItem('taxRates', JSON.stringify(taxRates));
@@ -76,11 +84,16 @@ export function AppProvider({ children }) {
   }, [selectedYear]);
 
   const addMealEntry = (entry) => {
-    setMealEntries(prev => [...prev, { ...entry, id: Date.now() }]);
+    const newEntry = { ...entry, id: entry.id || Date.now() };
+    setMealEntries(prev => [...prev, newEntry]);
   };
 
   const deleteMealEntry = (id) => {
     setMealEntries(prev => prev.filter(e => e.id !== id));
+  };
+
+  const updateMealEntry = (id, updatedEntry) => {
+    setMealEntries(prev => prev.map(entry => entry.id === id ? { ...entry, ...updatedEntry } : entry));
   };
 
   const addMileageEntry = (entry) => {
@@ -91,12 +104,48 @@ export function AppProvider({ children }) {
     setMileageEntries(prev => prev.filter(e => e.id !== id));
   };
 
+  const getMileageRate = (vehicleType) => {
+    switch (vehicleType) {
+      case 'motorcycle':
+        return taxRates.mileageRateMotorcycle || 0.20;
+      case 'bike':
+        return taxRates.mileageRateBike || 0.05;
+      case 'car':
+      default:
+        return taxRates.mileageRateCar || 0.30;
+    }
+  };
+
   const addEquipmentEntry = (entry) => {
-    setEquipmentEntries(prev => [...prev, { ...entry, id: Date.now() }]);
+    setEquipmentEntries(prev => [...prev, { ...entry, id: entry.id || Date.now() }]);
   };
 
   const deleteEquipmentEntry = (id) => {
     setEquipmentEntries(prev => prev.filter(e => e.id !== id));
+  };
+
+  const addMonthlyEmployerExpense = (entry) => {
+    setMonthlyEmployerExpenses(prev => {
+      const existingIndex = prev.findIndex(e => e.year === entry.year && e.month === entry.month);
+      if (existingIndex >= 0) {
+        const newArr = [...prev];
+        newArr[existingIndex] = { ...newArr[existingIndex], ...entry };
+        return newArr;
+      }
+      return [...prev, { ...entry, id: Date.now() }];
+    });
+  };
+
+  const deleteMonthlyEmployerExpense = (id) => {
+    setMonthlyEmployerExpenses(prev => prev.filter(e => e.id !== id));
+  };
+
+  const addExpenseEntry = (entry) => {
+    setExpenseEntries(prev => [...prev, { ...entry, id: entry.id || Date.now() }]);
+  };
+
+  const deleteExpenseEntry = (id) => {
+    setExpenseEntries(prev => prev.filter(e => e.id !== id));
   };
 
   const generateExampleData = () => {
@@ -143,12 +192,13 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      mealEntries, addMealEntry, deleteMealEntry,
+      mealEntries, addMealEntry, deleteMealEntry, updateMealEntry,
       mileageEntries, addMileageEntry, deleteMileageEntry,
       equipmentEntries, addEquipmentEntry, deleteEquipmentEntry,
-      stationDistance, setStationDistance,
-      employerRefundSettings, setEmployerRefundSettings,
-      taxRates, setTaxRates,
+      expenseEntries, addExpenseEntry, deleteExpenseEntry,
+      monthlyEmployerExpenses, addMonthlyEmployerExpense, deleteMonthlyEmployerExpense,
+      defaultCommute, setDefaultCommute,
+      taxRates, setTaxRates, getMileageRate,
       selectedYear, setSelectedYear,
       generateExampleData
     }}>

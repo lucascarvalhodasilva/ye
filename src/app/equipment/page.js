@@ -1,59 +1,44 @@
 "use client";
 import { useState } from 'react';
-import { useAppContext } from '@/context/AppContext';
-import NumberInput from '@/components/NumberInput';
+import { useEquipmentForm } from './_features/hooks/useEquipmentForm';
+import { useEquipmentList } from './_features/hooks/useEquipmentList';
+import EquipmentForm from './_features/components/EquipmentForm';
+import EquipmentList from './_features/components/EquipmentList';
+import { formatDate } from '@/utils/dateFormatter';
 
 export default function EquipmentPage() {
-  const { equipmentEntries, addEquipmentEntry, deleteEquipmentEntry, selectedYear, taxRates } = useAppContext();
-  const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    date: '',
-    price: '',
-    reimbursed: false
-  });
+  const [highlightId, setHighlightId] = useState(null);
+  const {
+    formData,
+    setFormData,
+    tempReceipt,
+    setTempReceipt,
+    showCameraOptions,
+    setShowCameraOptions,
+    nameSuggestions,
+    takePicture,
+    handleSubmit
+  } = useEquipmentForm();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const price = parseFloat(formData.price);
-    const gwgLimit = taxRates?.gwgLimit || 952;
-    const isDeductibleImmediately = price <= gwgLimit; // GWG limit
-    
-    // If reimbursed, deductible is 0. If not reimbursed and <= gwgLimit, full price. If > gwgLimit, needs depreciation (simplified here to 0 for now or full price with warning)
-    // Requirement says: > gwgLimit -> Nutzungsdauer berücksichtigen (optional).
-    // For simplicity, we'll mark it as "Abschreibung nötig" if > gwgLimit.
-    
-    let deductibleAmount = 0;
-    let status = '';
-
-    if (formData.reimbursed) {
-      deductibleAmount = 0;
-      status = 'Erstattet';
-    } else if (isDeductibleImmediately) {
-      deductibleAmount = price;
-      status = 'Sofort absetzbar (GWG)';
-    } else {
-      deductibleAmount = 0; // Or handle depreciation logic
-      status = `Abschreibung erforderlich (> ${gwgLimit}€)`;
-    }
-
-    addEquipmentEntry({
-      ...formData,
-      price,
-      deductibleAmount,
-      status
-    });
-
-    setFormData({
-      name: '',
-      category: '',
-      date: '',
-      price: '',
-      reimbursed: false
+  const handleFormSubmit = (e) => {
+    handleSubmit(e, (newId) => {
+      setHighlightId(newId);
+      setTimeout(() => setHighlightId(null), 2000);
     });
   };
 
-  const filteredEquipmentEntries = equipmentEntries.filter(entry => new Date(entry.date).getFullYear() === parseInt(selectedYear));
+  const {
+    filteredEquipmentEntries,
+    deleteEquipmentEntry,
+    selectedYear,
+    isFullScreen,
+    setIsFullScreen,
+    viewingReceipt,
+    setViewingReceipt,
+    handleViewReceipt
+  } = useEquipmentList();
+
+  const totalDeductible = filteredEquipmentEntries.reduce((sum, entry) => sum + entry.deductibleAmount, 0);
 
   return (
     <div className="space-y-8 py-8 container-custom">
@@ -62,111 +47,124 @@ export default function EquipmentPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Form */}
         <div className="space-y-6 lg:col-span-1">
-          <div className="card-modern">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Neues Arbeitsmittel</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Bezeichnung</label>
-                <input
-                  type="text"
-                  required
-                  className="input-modern"
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Kategorie</label>
-                <input
-                  type="text"
-                  className="input-modern"
-                  value={formData.category}
-                  onChange={e => setFormData({...formData, category: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Kaufdatum</label>
-                <input
-                  type="date"
-                  required
-                  className="input-modern"
-                  value={formData.date}
-                  onChange={e => setFormData({...formData, date: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Preis (Brutto €)</label>
-                <NumberInput
-                  step="0.01"
-                  required
-                  className="input-modern"
-                  value={formData.price}
-                  onChange={e => setFormData({...formData, price: e.target.value})}
-                />
-              </div>
-              <div className="flex items-center pt-2">
-                <input
-                  type="checkbox"
-                  id="reimbursed"
-                  className="h-4 w-4 rounded border-input bg-transparent text-primary focus:ring-primary"
-                  checked={formData.reimbursed}
-                  onChange={e => setFormData({...formData, reimbursed: e.target.checked})}
-                />
-                <label htmlFor="reimbursed" className="ml-2 block text-sm text-foreground">
-                  Vom Arbeitgeber erstattet?
-                </label>
-              </div>
-              <button type="submit" className="w-full btn-primary mt-2">
-                Hinzufügen
-              </button>
-            </form>
-          </div>
+          <EquipmentForm 
+            formData={formData}
+            setFormData={setFormData}
+            handleSubmit={handleFormSubmit}
+            tempReceipt={tempReceipt}
+            setTempReceipt={setTempReceipt}
+            showCameraOptions={showCameraOptions}
+            setShowCameraOptions={setShowCameraOptions}
+            nameSuggestions={nameSuggestions}
+            takePicture={takePicture}
+          />
         </div>
 
         {/* Right Column: List */}
         <div className="lg:col-span-2">
-          <div className="card-modern h-full">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">Inventarliste</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full table-modern">
-                <thead>
+          <EquipmentList 
+            filteredEquipmentEntries={filteredEquipmentEntries}
+            deleteEquipmentEntry={deleteEquipmentEntry}
+            selectedYear={selectedYear}
+            setIsFullScreen={setIsFullScreen}
+            handleViewReceipt={handleViewReceipt}
+            highlightId={highlightId}
+          />
+        </div>
+      </div>
+
+      {/* Full Screen Modal */}
+      {isFullScreen && (
+        <div className="fixed inset-0 bg-background z-50 flex flex-col animate-in fade-in duration-200">
+          <div className="pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] bg-card/50 backdrop-blur-sm border-b border-border">
+            <div className="flex items-center justify-between p-4">
+              <h2 className="text-lg font-semibold">Arbeitsmittel {selectedYear}</h2>
+              <button 
+                onClick={() => setIsFullScreen(false)}
+                className="p-2 hover:bg-secondary rounded-full transition-colors"
+              >
+                <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex-1 flex flex-col min-h-0 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pl-[calc(1rem+env(safe-area-inset-left))] pr-[calc(1rem+env(safe-area-inset-right))]">
+            <div className="max-w-5xl mx-auto w-full rounded-xl shadow-sm flex flex-col h-full overflow-hidden">
+              <div className="flex-1 overflow-auto min-h-0">
+                <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="bg-secondary text-muted-foreground font-medium border-b border-border sticky top-0 z-20">
                   <tr>
-                    <th>Datum</th>
-                    <th>Gegenstand</th>
-                    <th>Preis</th>
-                    <th>Status</th>
-                    <th>Absetzbar</th>
-                    <th></th>
+                    <th className="p-4">Datum</th>
+                    <th className="p-4">Gegenstand</th>
+                    <th className="p-4">Preis</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4 text-right sticky right-0 top-0 z-30 bg-secondary shadow-[-5px_0_10px_-5px_rgba(0,0,0,0.1)]">Absetzbar</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {filteredEquipmentEntries.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="text-center text-muted-foreground py-8">Keine Arbeitsmittel für {selectedYear} vorhanden.</td>
+                <tbody className="divide-y divide-border bg-card">
+                  {filteredEquipmentEntries.map((entry) => (
+                    <tr key={entry.id} className="hover:bg-secondary/10 transition-colors">
+                      <td className="p-4 font-medium">{formatDate(entry.date)}</td>
+                      <td className="p-4">
+                        <div className="font-medium">{entry.name}</div>
+                        {entry.receiptFileName && (
+                          <button 
+                            onClick={() => handleViewReceipt(entry.receiptFileName)}
+                            className="text-xs text-primary hover:underline mt-1"
+                          >
+                            Beleg anzeigen
+                          </button>
+                        )}
+                      </td>
+                      <td className="p-4">{entry.price.toFixed(2)} €</td>
+                      <td className="p-4 text-muted-foreground">{entry.status}</td>
+                      <td className="p-4 text-right font-bold text-primary sticky right-0 bg-card z-10 shadow-[-5px_0_10px_-5px_rgba(0,0,0,0.1)]">{entry.deductibleAmount.toFixed(2)} €</td>
                     </tr>
-                  ) : (
-                    filteredEquipmentEntries.map(entry => (
-                      <tr key={entry.id}>
-                        <td>{entry.date}</td>
-                        <td>
-                          <div className="font-medium text-foreground">{entry.name}</div>
-                          <div className="text-xs text-muted-foreground">{entry.category}</div>
-                        </td>
-                        <td>{entry.price.toFixed(2)} €</td>
-                        <td className="text-sm text-muted-foreground">{entry.status}</td>
-                        <td className="font-bold text-primary">{entry.deductibleAmount.toFixed(2)} €</td>
-                        <td className="text-right">
-                          <button onClick={() => deleteEquipmentEntry(entry.id)} className="text-destructive hover:text-destructive/80 text-sm font-medium">Löschen</button>
-                        </td>
-                      </tr>
-                    ))
+                  ))}
+                  {filteredEquipmentEntries.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                        Keine Einträge für {selectedYear} gefunden
+                      </td>
+                    </tr>
                   )}
                 </tbody>
+                <tfoot className="bg-secondary font-bold border-t border-border sticky bottom-0 z-20">
+                  <tr>
+                    <td colSpan={4} className="px-4 py-1 text-right">Gesamtsumme:</td>
+                    <td className="px-4 py-1 text-right text-primary sticky right-0 bottom-0 bg-secondary z-30 shadow-[-5px_0_10px_-5px_rgba(0,0,0,0.1)]">
+                      {totalDeductible.toFixed(2)} €
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Receipt Viewer Modal */}
+      {viewingReceipt && (
+        <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setViewingReceipt(null)}>
+          <div className="relative max-w-4xl max-h-[90vh] w-full flex flex-col items-center">
+            <img 
+              src={viewingReceipt} 
+              alt="Beleg" 
+              className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button 
+              onClick={() => setViewingReceipt(null)}
+              className="mt-4 px-6 py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-full font-medium transition-colors shadow-lg"
+            >
+              Schließen
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
