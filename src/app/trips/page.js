@@ -142,7 +142,7 @@ export default function TripsPage() {
         {/* Trip Form Modal */}
         {showTripModal && (
           <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-[8vh] overflow-y-auto animate-in fade-in duration-200"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
             onClick={handleModalClose}
           >
             <div 

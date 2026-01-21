@@ -42,14 +42,14 @@ export const useTripForm = () => {
   const [initialEditData, setInitialEditData] = useState(null);
   const [initialReceiptPath, setInitialReceiptPath] = useState(null);
 
-  // Load saved form data from local storage
+  // Load saved form data from local storage (excluding dates - they should start empty)
   useEffect(() => {
     const savedData = localStorage.getItem('MEALS_FORM_DATA');
     if (savedData) {
       try {
         const parsed = JSON.parse(savedData);
-        // Exclude commute from loaded data to ensure we use defaults
-        const { commute, ...rest } = parsed;
+        // Exclude commute and dates from loaded data - dates should start empty for new entries
+        const { commute, date, endDate, startTime, endTime, ...rest } = parsed;
         setFormData(prev => ({ ...prev, ...rest }));
       } catch (e) {
         console.error("Failed to parse saved form data", e);

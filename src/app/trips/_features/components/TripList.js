@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { formatDate } from '@/utils/dateFormatter';
-import ConfirmationModal from '@/components/ConfirmationModal';
+import ConfirmationModal from '@/components/shared/ConfirmationModal';
 
 /**
  * @typedef {Object} MealEntry
@@ -123,7 +123,7 @@ export default function TripList({
     };
   }, []);
 
-  const actionsWidth = 170;
+  const actionsWidth = 120;
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm overflow-hidden">
@@ -213,12 +213,12 @@ export default function TripList({
               >
                 {/* Swipe Actions */}
                 <div 
-                  className="absolute top-0 right-0 h-full flex items-stretch z-0"
+                  className="absolute top-0 right-0 h-full flex items-center justify-end gap-2 pr-3 z-0"
                   style={{ width: `${actionsWidth}px` }}
                 >
                   <button
                     onClick={(e) => { e.stopPropagation(); setOpenSwipeId(null); onEdit && onEdit(entry); }}
-                    className="w-1/2 bg-slate-600/90 hover:bg-slate-500/90 text-white transition-all flex items-center justify-center active:scale-95"
+                    className="w-12 h-12 bg-indigo-500/85 backdrop-blur-md hover:bg-indigo-500/95 text-white transition-all flex items-center justify-center active:scale-95 shadow-inner rounded-2xl"
                     aria-label="Eintrag bearbeiten"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -231,7 +231,7 @@ export default function TripList({
                       setOpenSwipeId(null); 
                       setDeleteConfirmation({ isOpen: true, entry }); 
                     }}
-                    className="w-1/2 bg-rose-500/80 hover:bg-rose-400/80 text-white transition-all flex items-center justify-center active:scale-95"
+                    className="w-12 h-12 bg-rose-500/85 backdrop-blur-md hover:bg-rose-500/95 text-white transition-all flex items-center justify-center active:scale-95 shadow-inner rounded-2xl"
                     aria-label="Eintrag löschen"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -249,11 +249,7 @@ export default function TripList({
                 >
                   <div className="flex items-center gap-4">
                     {/* Date Badge */}
-                    <div className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 ${
-                      isMultiDay 
-                        ? 'bg-primary/10 text-primary' 
-                        : 'bg-white/60 dark:bg-white/5 text-foreground'
-                    }`}>
+                    <div className="w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 bg-primary/10 text-primary">
                       <span className="text-lg font-bold leading-none">
                         {new Date(entry.date).getDate()}
                       </span>
@@ -266,7 +262,7 @@ export default function TripList({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-sm font-semibold text-foreground truncate">
-                          {entry.destination || formatDate(entry.date)}
+                          {entry.destination || entry.purpose || 'Dienstreise'}
                         </h3>
                         {isMultiDay && (
                           <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium shrink-0">

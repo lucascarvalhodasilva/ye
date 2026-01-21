@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import NumberInput from '@/components/NumberInput';
+import NumberInput from '@/components/shared/NumberInput';
 import { useAppContext } from '@/context/AppContext';
 
 export default function TaxSettings() {

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import NumberInput from '@/components/NumberInput';
-import CustomDatePicker from '@/components/CustomDatePicker';
-import SuggestionInput from '@/components/SuggestionInput';
+import NumberInput from '@/components/shared/NumberInput';
+import CustomDatePicker from '@/components/shared/CustomDatePicker';
+import SuggestionInput from '@/components/shared/SuggestionInput';
 import { CameraSource } from '@capacitor/camera';
 
 export default function EquipmentForm({ 

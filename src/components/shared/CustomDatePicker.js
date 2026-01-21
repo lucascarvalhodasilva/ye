@@ -1,12 +1,13 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Check, X } from 'lucide-react';
 
-export default function CustomDatePicker({ value, onChange, className = "", min, placeholder = "TT.MM.JJJJ" }) {
+export default function CustomDatePicker({ value, onChange, className = "", min, placeholder = "TT.MM.JJJJ", clearable = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(new Date());
   const [mounted, setMounted] = useState(false);
+  const [previewDate, setPreviewDate] = useState(null); // Temporarily selected date
 
   // Initialize component and sync viewDate with value
   useEffect(() => {
@@ -18,6 +19,13 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
       }
     }
   }, [value]);
+
+  // Reset preview when opening
+  useEffect(() => {
+    if (isOpen) {
+      setPreviewDate(null);
+    }
+  }, [isOpen]);
 
   // Close on Escape key
   useEffect(() => {
@@ -52,9 +60,23 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
     // Check if date is before minimum allowed date
     if (min && dateString < min) return;
 
-    onChange({ target: { value: dateString } });
+    // Set as preview instead of immediately selecting
+    setPreviewDate(dateString);
+  }, [viewDate, min]);
+
+  const handleConfirm = useCallback(() => {
+    if (previewDate) {
+      onChange({ target: { value: previewDate } });
+      setIsOpen(false);
+      setPreviewDate(null);
+    }
+  }, [previewDate, onChange]);
+
+  const handleClear = useCallback(() => {
+    onChange({ target: { value: '' } });
     setIsOpen(false);
-  }, [viewDate, min, onChange]);
+    setPreviewDate(null);
+  }, [onChange]);
 
   // Calendar calculations
   const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
@@ -68,6 +90,11 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
   const displayValue = value 
     ? new Date(value).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
     : "";
+
+  // Format preview date for display
+  const previewDisplayValue = previewDate 
+    ? new Date(previewDate).toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
 
   return (
     <>
@@ -162,6 +189,7 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
                 const dateStr = `${currentY}-${currentM}-${currentD}`;
                 
                 const isSelected = value === dateStr;
+                const isPreview = previewDate === dateStr;
                 const isToday = new Date().toDateString() === new Date(currentY, viewDate.getMonth(), day).toDateString();
                 const isDisabled = min && dateStr < min;
 
@@ -173,23 +201,27 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
                     onClick={() => handleDayClick(day)}
                     role="gridcell"
                     aria-label={`${day}. ${MONTHS[viewDate.getMonth()]} ${currentY}`}
-                    aria-selected={isSelected}
+                    aria-selected={isSelected || isPreview}
                     aria-disabled={isDisabled}
                     className={`
                       h-10 w-full rounded-lg
                       flex items-center justify-center
                       text-sm font-medium
                       transition-all duration-200
-                      ${isSelected 
-                        ? 'bg-primary text-primary-foreground shadow-md scale-105' 
+                      ${isPreview 
+                        ? 'bg-primary text-primary-foreground shadow-lg scale-110 ring-2 ring-primary ring-offset-2 ring-offset-card' 
                         : ''
                       }
-                      ${!isSelected && !isDisabled 
+                      ${isSelected && !isPreview
+                        ? 'bg-primary/20 text-primary font-bold' 
+                        : ''
+                      }
+                      ${!isSelected && !isPreview && !isDisabled 
                         ? 'hover:bg-secondary hover:scale-105' 
                         : ''
                       }
-                      ${isToday && !isSelected 
-                        ? 'ring-2 ring-primary ring-inset font-bold' 
+                      ${isToday && !isSelected && !isPreview
+                        ? 'ring-2 ring-primary/50 ring-inset font-bold' 
                         : ''
                       }
                       ${isDisabled 
@@ -204,15 +236,54 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
               })}
             </div>
 
-            {/* Footer: Cancel Button */}
-            <footer className="mt-6 pt-4 border-t border-border">
-              <button 
-                type="button"
-                onClick={() => setIsOpen(false)} 
-                className="w-full py-3 text-center text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
-              >
-                Abbrechen
-              </button>
+            {/* Footer: Preview & Actions */}
+            <footer className="mt-6 pt-4 border-t border-border space-y-3">
+              {/* Preview Display */}
+              {previewDate && (
+                <div className="text-center py-2 px-3 bg-primary/10 rounded-lg animate-in fade-in slide-in-from-bottom-2 duration-200">
+                  <p className="text-sm font-medium text-primary">{previewDisplayValue}</p>
+                </div>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <button 
+                  type="button"
+                  onClick={() => setIsOpen(false)} 
+                  className="flex-1 py-3 text-center text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+                >
+                  Abbrechen
+                </button>
+
+                {/* Clear Button - only show when clearable and has value */}
+                {clearable && value && !previewDate && (
+                  <button 
+                    type="button"
+                    onClick={handleClear}
+                    className="flex-1 py-3 text-center text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 bg-destructive/10 text-destructive hover:bg-destructive/20"
+                  >
+                    <X className="w-4 h-4" />
+                    Löschen
+                  </button>
+                )}
+                
+                <button 
+                  type="button"
+                  onClick={handleConfirm}
+                  disabled={!previewDate}
+                  className={`
+                    flex-1 py-3 text-center text-sm font-medium rounded-lg transition-all
+                    flex items-center justify-center gap-2
+                    ${previewDate 
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-md' 
+                      : 'bg-muted text-muted-foreground cursor-not-allowed'
+                    }
+                  `}
+                >
+                  <Check className="w-4 h-4" />
+                  Bestätigen
+                </button>
+              </div>
             </footer>
           </div>
         </div>,

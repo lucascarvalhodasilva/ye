@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { formatDate } from '@/utils/dateFormatter';
-import ConfirmationModal from '@/components/ConfirmationModal';
+import ConfirmationModal from '@/components/shared/ConfirmationModal';
 
 export default function EquipmentList({ 
   filteredEquipmentEntries, 
