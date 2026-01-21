@@ -1,12 +1,14 @@
 "use client";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-export default function CustomDatePicker({ value, onChange, className = "", min }) {
+export default function CustomDatePicker({ value, onChange, className = "", min, placeholder = "TT.MM.JJJJ" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [viewDate, setViewDate] = useState(new Date());
   const [mounted, setMounted] = useState(false);
 
+  // Initialize component and sync viewDate with value
   useEffect(() => {
     setMounted(true);
     if (value) {
@@ -17,102 +19,148 @@ export default function CustomDatePicker({ value, onChange, className = "", min 
     }
   }, [value]);
 
-  const toggleOpen = () => setIsOpen(!isOpen);
+  // Close on Escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
 
-  const handlePrevMonth = (e) => {
+  const toggleOpen = useCallback(() => setIsOpen(prev => !prev), []);
+
+  const handlePrevMonth = useCallback((e) => {
     e.stopPropagation();
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
-  };
+    setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  }, []);
 
-  const handleNextMonth = (e) => {
+  const handleNextMonth = useCallback((e) => {
     e.stopPropagation();
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
-  };
+    setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  }, []);
 
-  const handleDayClick = (day) => {
+  const handleDayClick = useCallback((day) => {
     const selectedDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
     const y = selectedDate.getFullYear();
     const m = String(selectedDate.getMonth() + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
     const dateString = `${y}-${m}-${d}`;
     
+    // Check if date is before minimum allowed date
     if (min && dateString < min) return;
 
     onChange({ target: { value: dateString } });
     setIsOpen(false);
-  };
+  }, [viewDate, min, onChange]);
 
+  // Calendar calculations
   const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
-  const firstDayOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay(); // 0 = Sun
-  // Adjust for Monday start (German standard)
+  const firstDayOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
+  // Adjust for Monday start (German standard: Monday = 0, Sunday = 6)
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
-  const months = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
-  const weekDays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  const MONTHS = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+  const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
-  const displayValue = value ? new Date(value).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "";
+  const displayValue = value 
+    ? new Date(value).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
+    : "";
 
   return (
     <>
-      <div 
+      {/* Trigger Button */}
+      <button
+        type="button"
         onClick={toggleOpen}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggleOpen();
-          }
-        }}
-        tabIndex={0}
-        role="button"
+        className={`
+          flex items-center justify-between w-full
+          px-3 py-2 
+          bg-background border border-input rounded-lg
+          text-sm text-left
+          hover:border-ring
+          focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2
+          transition-colors
+          ${!value ? 'text-muted-foreground' : 'text-foreground'}
+          ${className}
+        `}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className={`relative flex items-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md ${className}`}
+        aria-label="Datum auswählen"
       >
-        <div className={`flex-1 truncate ${!value ? 'text-muted-foreground' : ''}`}>
-          {displayValue || "TT.MM.JJJJ"}
-        </div>
-        <svg className="w-4 h-4 text-muted-foreground ml-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
+        <span className="flex-1 truncate">
+          {displayValue || placeholder}
+        </span>
+        <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+      </button>
 
+      {/* Calendar Modal */}
       {isOpen && mounted && createPortal(
-        <div className="fixed inset-0 z-9999 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
-          <div className="bg-card border border-border w-full max-w-sm sm:rounded-xl rounded-t-xl p-4 shadow-2xl animate-in slide-in-from-bottom-10 fade-in duration-200" onClick={e => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setIsOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Kalender"
+        >
+          <div 
+            className="bg-card border border-border w-full max-w-sm rounded-t-xl sm:rounded-xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 fade-in duration-200"
+            onClick={e => e.stopPropagation()}
+          >
             
-            {/* Header */}
-            <div className="flex justify-between items-center mb-4">
-              <button onClick={handlePrevMonth} className="p-2 hover:bg-secondary rounded-full">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            {/* Header: Month Navigation */}
+            <header className="flex items-center justify-between mb-6">
+              <button 
+                onClick={handlePrevMonth} 
+                className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                aria-label="Vorheriger Monat"
+              >
+                <ChevronLeft className="w-5 h-5" />
               </button>
-              <span className="font-semibold text-lg">
-                {months[viewDate.getMonth()]} {viewDate.getFullYear()}
-              </span>
-              <button onClick={handleNextMonth} className="p-2 hover:bg-secondary rounded-full">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+              
+              <h2 className="font-semibold text-lg">
+                {MONTHS[viewDate.getMonth()]} {viewDate.getFullYear()}
+              </h2>
+              
+              <button 
+                onClick={handleNextMonth} 
+                className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                aria-label="Nächster Monat"
+              >
+                <ChevronRight className="w-5 h-5" />
               </button>
-            </div>
+            </header>
 
-            {/* Weekdays */}
-            <div className="grid grid-cols-7 mb-2">
-              {weekDays.map(d => (
-                <div key={d} className="text-center text-xs text-muted-foreground font-medium py-1">
-                  {d}
+            {/* Weekday Headers */}
+            <div className="grid grid-cols-7 mb-2" role="row">
+              {WEEKDAYS.map(day => (
+                <div 
+                  key={day} 
+                  className="text-center text-xs font-medium text-muted-foreground py-2"
+                  role="columnheader"
+                >
+                  {day}
                 </div>
               ))}
             </div>
 
-            {/* Days */}
-            <div className="grid grid-cols-7 gap-1">
+            {/* Calendar Days Grid */}
+            <div className="grid grid-cols-7 gap-1" role="grid">
+              {/* Empty cells for offset */}
               {Array.from({ length: startOffset }).map((_, i) => (
-                <div key={`empty-${i}`} />
+                <div key={`empty-${i}`} role="gridcell" aria-hidden="true" />
               ))}
+              
+              {/* Day buttons */}
               {Array.from({ length: daysInMonth }).map((_, i) => {
                 const day = i + 1;
                 const currentY = viewDate.getFullYear();
                 const currentM = String(viewDate.getMonth() + 1).padStart(2, '0');
                 const currentD = String(day).padStart(2, '0');
                 const dateStr = `${currentY}-${currentM}-${currentD}`;
+                
                 const isSelected = value === dateStr;
                 const isToday = new Date().toDateString() === new Date(currentY, viewDate.getMonth(), day).toDateString();
                 const isDisabled = min && dateStr < min;
@@ -120,14 +168,34 @@ export default function CustomDatePicker({ value, onChange, className = "", min 
                 return (
                   <button
                     key={day}
+                    type="button"
                     disabled={isDisabled}
                     onClick={() => handleDayClick(day)}
+                    role="gridcell"
+                    aria-label={`${day}. ${MONTHS[viewDate.getMonth()]} ${currentY}`}
+                    aria-selected={isSelected}
+                    aria-disabled={isDisabled}
                     className={`
-                      h-10 w-full rounded-lg flex items-center justify-center text-sm font-medium transition-all
-                      ${isSelected ? 'bg-primary text-primary-foreground shadow-md' : ''}
-                      ${!isSelected && !isDisabled ? 'hover:bg-secondary' : ''}
-                      ${isToday && !isSelected ? 'text-primary border border-primary/50' : ''}
-                      ${isDisabled ? 'opacity-30 cursor-not-allowed' : ''}
+                      h-10 w-full rounded-lg
+                      flex items-center justify-center
+                      text-sm font-medium
+                      transition-all duration-200
+                      ${isSelected 
+                        ? 'bg-primary text-primary-foreground shadow-md scale-105' 
+                        : ''
+                      }
+                      ${!isSelected && !isDisabled 
+                        ? 'hover:bg-secondary hover:scale-105' 
+                        : ''
+                      }
+                      ${isToday && !isSelected 
+                        ? 'ring-2 ring-primary ring-inset font-bold' 
+                        : ''
+                      }
+                      ${isDisabled 
+                        ? 'opacity-30 cursor-not-allowed' 
+                        : 'cursor-pointer'
+                      }
                     `}
                   >
                     {day}
@@ -136,9 +204,16 @@ export default function CustomDatePicker({ value, onChange, className = "", min 
               })}
             </div>
 
-            <button onClick={() => setIsOpen(false)} className="w-full mt-4 py-3 text-center text-sm font-medium text-muted-foreground hover:text-foreground">
-              Abbrechen
-            </button>
+            {/* Footer: Cancel Button */}
+            <footer className="mt-6 pt-4 border-t border-border">
+              <button 
+                type="button"
+                onClick={() => setIsOpen(false)} 
+                className="w-full py-3 text-center text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
+              >
+                Abbrechen
+              </button>
+            </footer>
           </div>
         </div>,
         document.body

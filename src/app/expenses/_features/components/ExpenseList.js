@@ -30,12 +30,12 @@ export default function ExpenseList({
           innerElement.classList.add('transition-all', 'duration-300', 'ease-in-out');
           const flash = () => {
             innerElement.classList.add('scale-[1.02]');
-            innerElement.classList.remove('bg-card');
-            innerElement.classList.add('bg-[#18181c]');
+            innerElement.classList.remove('bg-white');
+            innerElement.classList.add('bg-blue-50');
             setTimeout(() => {
               innerElement.classList.remove('scale-[1.02]');
-              innerElement.classList.remove('bg-[#18181c]');
-              innerElement.classList.add('bg-card');
+              innerElement.classList.remove('bg-blue-50');
+              innerElement.classList.add('bg-white');
             }, 300);
           };
           
@@ -90,28 +90,30 @@ export default function ExpenseList({
   const actionsWidth = 170;
 
   return (
-    <div className="space-y-6">
+    <section className="space-y-6">
       {/* Monthly Summary */}
       <MonthlySummary monthlyExpenses={monthlyExpenses} monthNames={monthNames} />
 
       {/* List */}
-      <div className="card-modern h-full flex flex-col">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Ausgabenliste</h2>
+      <article className="flex flex-col h-full rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <header className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Ausgabenliste</h2>
           <button 
             onClick={() => setIsFullScreen(true)}
-            className="text-xs bg-secondary hover:bg-secondary/80 text-foreground px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-full bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200"
           >
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
             </svg>
             Vollbild
           </button>
-        </div>
+        </header>
         
         <div className="space-y-3">
           {filteredEntries.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-8 text-center">Keine Ausgaben für {selectedYear} vorhanden.</div>
+            <div className="py-8 text-center text-sm text-gray-500">
+              Keine Ausgaben für {selectedYear} vorhanden.
+            </div>
           ) : (
             filteredEntries.map(entry => {
               const isOpen = openSwipeId === entry.id;
@@ -120,19 +122,19 @@ export default function ExpenseList({
                 <div 
                   key={entry.id}
                   id={`expense-row-${entry.id}`}
-                  className="relative overflow-hidden bg-card border-b border-border last:border-b-0"
+                  className="relative overflow-hidden border-b border-gray-100 bg-white last:border-b-0"
                   onMouseDown={(e) => handlePointerDown(e, entry.id)}
                   onTouchStart={(e) => handlePointerDown(e, entry.id)}
                   onMouseMove={handlePointerMove}
                   onTouchMove={handlePointerMove}
                 >
                   <div 
-                    className="absolute top-0 right-0 h-full flex items-stretch z-0"
+                    className="absolute top-0 right-0 z-0 flex h-full items-stretch"
                     style={{ width: `${actionsWidth}px` }}
                   >
                     <button
                       onClick={(e) => { e.stopPropagation(); setOpenSwipeId(null); onEdit && onEdit(entry); }}
-                      className="w-1/2 bg-secondary text-foreground hover:bg-secondary/80 text-sm font-medium transition-colors"
+                      className="w-1/2 text-sm font-medium bg-gray-500 text-white transition-colors hover:bg-gray-600"
                       aria-label="Eintrag bearbeiten"
                     >
                       Bearbeiten
@@ -143,33 +145,33 @@ export default function ExpenseList({
                         setOpenSwipeId(null); 
                         setDeleteConfirmation({ isOpen: true, entry }); 
                       }}
-                      className="w-1/2 bg-destructive text-destructive-foreground hover:bg-destructive/80 text-sm font-medium transition-colors"
+                      className="w-1/2 text-sm font-medium bg-red-500 text-white transition-colors hover:bg-red-600"
                       aria-label="Eintrag löschen"
                     >
                       Löschen
                     </button>
                   </div>
 
-                                    <div
+                  <div
                     id={`swipe-inner-${entry.id}`}
-                    className={`relative px-4 transition-transform duration-200 bg-card z-10 `}
+                    className="relative z-10 px-4 bg-white transition-transform duration-200"
                     onMouseUp={handlePointerUp}
                     onTouchEnd={handlePointerUp}
                   >
-                    <div className="h-20 flex items-center justify-between gap-3">
+                    <div className="flex items-center justify-between gap-3 h-20">
                       <div className="flex flex-col">
-                        <div className="font-medium text-foreground">{entry.description}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{formatDate(entry.date)}</div>
+                        <span className="font-medium text-gray-900">{entry.description}</span>
+                        <span className="mt-0.5 text-xs text-gray-500">{formatDate(entry.date)}</span>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <span className="font-bold text-foreground">{entry.amount.toFixed(2)} €</span>
+                        <span className="font-bold text-gray-900">{entry.amount.toFixed(2)} €</span>
                         {entry.receiptFileName && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleViewReceipt(entry);
                             }}
-                            className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full hover:bg-primary/20 transition-colors flex items-center gap-1"
+                            className="flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-full bg-blue-100 text-blue-600 transition-colors hover:bg-blue-200"
                           >
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -185,21 +187,24 @@ export default function ExpenseList({
             })
           )}
         </div>
-      </div>
+      </article>
 
       {/* Receipt Viewer Modal */}
       {viewingReceipt && (
-        <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setViewingReceipt(null)}>
-          <div className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center">
+        <div 
+          className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" 
+          onClick={() => setViewingReceipt(null)}
+        >
+          <div className="relative flex flex-col items-center max-w-4xl w-full max-h-[90vh]">
             <img 
               src={`data:image/jpeg;base64,${viewingReceipt}`} 
               alt="Beleg" 
-              className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl bg-black/50"
+              className="max-w-full max-h-[80vh] rounded-lg bg-black/50 shadow-2xl object-contain"
               onClick={(e) => e.stopPropagation()}
             />
             <button 
               onClick={() => setViewingReceipt(null)}
-              className="mt-4 px-6 py-2 bg-secondary text-foreground rounded-full hover:bg-secondary/80 transition-colors shadow-lg font-medium"
+              className="mt-4 px-6 py-2 font-medium rounded-full bg-white text-gray-700 shadow-lg transition-colors hover:bg-gray-100"
             >
               Schließen
             </button>
@@ -219,6 +224,6 @@ export default function ExpenseList({
         title="Eintrag löschen"
         message={deleteConfirmation.entry ? `Möchten Sie die Ausgabe "${deleteConfirmation.entry.description}" vom ${formatDate(deleteConfirmation.entry.date)} wirklich löschen?` : ''}
       />
-    </div>
+    </section>
   );
 }

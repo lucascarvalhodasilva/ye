@@ -17,24 +17,24 @@ export default function Dashboard() {
   } = useDashboard();
 
   return (
-    <div className="space-y-4 py-4 md:space-y-6 md:py-6 container-custom">
-      <div className="flex justify-between items-center">
-        <p className="text-sm md:text-base text-muted-foreground">Übersicht Ihrer steuerlichen Absetzungen für {selectedYear}.</p>
-      </div>
+    <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="flex flex-col gap-6 py-6 max-w-6xl mx-auto w-full" style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
 
-      <DashboardKPIs 
-        selectedYear={selectedYear}
-        grandTotal={grandTotal}
-        totalMeals={totalMeals}
-        totalMileage={totalMileage}
-        totalEquipment={totalEquipment}
-        totalEmployerReimbursement={totalEmployerReimbursement}
-        totalExpenses={totalExpenses}
-        netTotal={netTotal}
-      />
 
-      <div className="grid grid-cols-1 gap-4 md:gap-6">
-        <RecentActivities recentActivities={recentActivities} />
+        <DashboardKPIs 
+          selectedYear={selectedYear}
+          grandTotal={grandTotal}
+          totalMeals={totalMeals}
+          totalMileage={totalMileage}
+          totalEquipment={totalEquipment}
+          totalEmployerReimbursement={totalEmployerReimbursement}
+          totalExpenses={totalExpenses}
+          netTotal={netTotal}
+        />
+
+        <div className="grid grid-cols-1 gap-6">
+          <RecentActivities recentActivities={recentActivities} />
+        </div>
       </div>
     </div>
   );

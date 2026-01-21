@@ -35,11 +35,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="de">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background min-h-screen pb-40 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background min-h-screen pb-20 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] flex flex-col items-center gap-0`}
       >
         <AppProvider>
           <Navbar />
-          <main>
+          <main className="w-full max-w-4xl px-4">
             {children}
           </main>
         </AppProvider>

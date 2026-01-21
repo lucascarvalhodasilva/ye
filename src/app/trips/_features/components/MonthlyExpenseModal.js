@@ -17,32 +17,44 @@ export default function MonthlyExpenseModal({
   const isPositive = balance >= 0;
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-card border border-border rounded-xl shadow-lg w-full max-w-sm p-6 animate-in zoom-in-95 duration-200">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">
-          Spesen im {monthNames[selectedMonth]}
-        </h3>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-sm border-2 border-blue-500 animate-in zoom-in-95 duration-200">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h3 className="text-lg font-bold text-gray-900">
+            Spesen im {monthNames[selectedMonth]}
+          </h3>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
         
-        <div className="space-y-4">
-          <div className="bg-secondary/30 rounded-lg p-3 space-y-2">
+        {/* Modal Body */}
+        <div className="p-4 space-y-4">
+          <div className="border-2 border-blue-400 rounded-lg p-4 bg-blue-50 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Absetzbare Pauschalen:</span>
-              <span className="font-medium text-emerald-600">+{monthlyDeductible.toFixed(2)} €</span>
+              <span className="text-gray-600">Absetzbare Pauschalen:</span>
+              <span className="font-medium text-green-600">+{monthlyDeductible.toFixed(2)} €</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Fleet Spesen:</span>
-              <span className="font-medium text-destructive">-{currentExpense.toFixed(2)} €</span>
+              <span className="text-gray-600">Fleet Spesen:</span>
+              <span className="font-medium text-red-600">-{currentExpense.toFixed(2)} €</span>
             </div>
-            <div className="border-t border-border/50 pt-2 flex justify-between text-sm font-semibold">
-              <span>Monatsbilanz:</span>
-              <span className={isPositive ? 'text-emerald-600' : 'text-destructive'}>
+            <div className="border-t border-blue-200 pt-2 flex justify-between text-sm font-semibold">
+              <span className="text-gray-700">Monatsbilanz:</span>
+              <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
                 {isPositive ? '+' : ''}{balance.toFixed(2)} €
               </span>
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+            <label className="text-xs text-gray-600 block mb-1 font-medium">
               Betrag (€)
             </label>
             <input
@@ -50,26 +62,26 @@ export default function MonthlyExpenseModal({
               step="0.01"
               value={expenseAmount}
               onChange={(e) => setExpenseAmount(e.target.value)}
-              className="w-full p-3 rounded-lg bg-secondary/30 border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-lg font-medium"
+              className="w-full px-3 py-2 bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base font-medium"
               placeholder="0.00"
               autoFocus
             />
           </div>
+        </div>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={handleSaveExpense}
-              className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors text-sm shadow-sm"
-            >
-              Speichern
-            </button>
-          </div>
-          
+        {/* Modal Footer */}
+        <div className="flex gap-2 p-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 rounded-lg text-muted-foreground hover:bg-secondary/50 text-sm transition-colors"
+            className="flex-1 px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm"
           >
             Abbrechen
+          </button>
+          <button
+            onClick={handleSaveExpense}
+            className="flex-1 px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors text-sm shadow-sm"
+          >
+            Speichern
           </button>
         </div>
       </div>

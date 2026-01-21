@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTripForm } from './_features/hooks/useTripForm';
 import { useTripList } from './_features/hooks/useTripList';
 import { useMonthlyExpenses } from './_features/hooks/useMonthlyExpenses';
@@ -12,6 +12,7 @@ import FullScreenTableView from './_features/components/FullScreenTableView';
 export default function TripsPage() {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [highlightId, setHighlightId] = useState(null);
+  const [showTripModal, setShowTripModal] = useState(false);
   const currentMonth = new Date().getMonth();
 
   const { 
@@ -32,13 +33,35 @@ export default function TripsPage() {
     hasChanges
   } = useTripForm();
 
+  // Close modal after successful submit
   const handleFormSubmit = (e) => {
     handleSubmit(e, (newId) => {
       setHighlightId(newId);
+      setShowTripModal(false);
       // Clear highlight after animation
       setTimeout(() => setHighlightId(null), 2000);
     });
   };
+
+  // Close modal and cancel edit
+  const handleModalClose = () => {
+    setShowTripModal(false);
+    if (editingId) {
+      cancelEdit();
+    }
+  };
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showTripModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showTripModal]);
 
   const { 
     filteredMealEntries, 
@@ -84,39 +107,13 @@ export default function TripsPage() {
   })() : 0;
 
   return (
-    <div className="space-y-8 py-8 container-custom">
-      <p className="text-muted-foreground">Tragen Sie Ihre Abwesenheitszeiten ein – Verpflegungspauschalen und Fahrtkosten werden automatisch ermittelt.</p>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Form */}
-        <div className="space-y-6 lg:col-span-1 scroll-mt-32" id="trip-form-container">
-          <TripForm 
-            formData={formData}
-            setFormData={setFormData}
-            handleSubmit={handleFormSubmit}
-            submitError={submitError}
-            editingId={editingId}
-            cancelEdit={cancelEdit}
-            hasChanges={hasChanges}
-            tempPublicTransportReceipt={tempPublicTransportReceipt}
-            showPublicTransportCameraOptions={showPublicTransportCameraOptions}
-            setShowPublicTransportCameraOptions={setShowPublicTransportCameraOptions}
-            takePublicTransportPicture={takePublicTransportPicture}
-            removePublicTransportReceipt={removePublicTransportReceipt}
-          />
-        </div>
-
-        {/* Right Column: List & Stats */}
-        <div className="space-y-6 lg:col-span-2">
-          <BalanceSheetScroller 
-            filteredMonthlyExpenses={filteredMonthlyExpenses}
-            filteredMealEntries={filteredMealEntries}
-            mileageEntries={mileageEntries}
-            selectedYear={selectedYear}
-            handleClickWrapper={handleClickWrapper}
-            handleMonthClick={handleMonthClick}
-          />
-
+    <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div 
+        className="flex flex-col gap-8 py-8 max-w-6xl mx-auto w-full"
+        style={{ paddingLeft: '1rem', paddingRight: '1rem' }}
+      >
+        {/* Full Width Content */}
+        <div className="flex flex-col gap-6">
           <TripList 
             filteredMealEntries={filteredMealEntries}
             mileageEntries={mileageEntries}
@@ -127,56 +124,87 @@ export default function TripsPage() {
             handleViewReceipt={handleViewReceipt}
             onEdit={(entry) => {
               startEdit(entry);
-              
-              // Scroll to form
-              const formContainer = document.getElementById('trip-form-container');
-              if (formContainer) {
-                formContainer.scrollIntoView({ behavior: 'smooth'});
-              } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
+              setShowTripModal(true);
             }}
+            onAddTrip={() => setShowTripModal(true)}
+          />
+
+          <BalanceSheetScroller 
+            filteredMonthlyExpenses={filteredMonthlyExpenses}
+            filteredMealEntries={filteredMealEntries}
+            mileageEntries={mileageEntries}
+            selectedYear={selectedYear}
+            handleClickWrapper={handleClickWrapper}
+            handleMonthClick={handleMonthClick}
           />
         </div>
-      </div>
 
-      {/* Receipt Viewer Modal */}
-      {viewingReceipt && (
-        <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setViewingReceipt(null)}>
-          <div className="relative max-w-3xl w-full max-h-[90vh] flex flex-col items-center">
-            <img 
-              src={viewingReceipt} 
-              alt="Beleg" 
-              className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
-              onClick={e => e.stopPropagation()}
-            />
-            <button 
-              onClick={() => setViewingReceipt(null)}
-              className="mt-4 px-6 py-2 bg-secondary text-foreground rounded-full hover:bg-secondary/80 transition-colors shadow-lg font-medium"
+        {/* Trip Form Modal */}
+        {showTripModal && (
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-[8vh] overflow-y-auto animate-in fade-in duration-200"
+            onClick={handleModalClose}
+          >
+            <div 
+              className="w-full max-w-md animate-in zoom-in-95 slide-in-from-bottom-4 duration-200"
+              onClick={(e) => e.stopPropagation()}
             >
-              Schließen
-            </button>
+              <TripForm 
+                formData={formData}
+                setFormData={setFormData}
+                handleSubmit={handleFormSubmit}
+                submitError={submitError}
+                editingId={editingId}
+                cancelEdit={handleModalClose}
+                hasChanges={hasChanges}
+              tempPublicTransportReceipt={tempPublicTransportReceipt}
+              showPublicTransportCameraOptions={showPublicTransportCameraOptions}
+              setShowPublicTransportCameraOptions={setShowPublicTransportCameraOptions}
+              takePublicTransportPicture={takePublicTransportPicture}
+              removePublicTransportReceipt={removePublicTransportReceipt}
+            />
           </div>
         </div>
       )}
 
-      <MonthlyExpenseModal 
-        isOpen={showExpenseModal}
-        onClose={() => setShowExpenseModal(false)}
-        selectedMonth={expenseMonth?.month}
-        expenseAmount={expenseAmount}
-        setExpenseAmount={setExpenseAmount}
-        handleSaveExpense={saveMonthlyExpense}
-        monthlyDeductible={monthlyDeductible}
-      />
+        {/* Receipt Viewer Modal */}
+        {viewingReceipt && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setViewingReceipt(null)}>
+            <div className="relative max-w-3xl w-full max-h-[90vh] flex flex-col items-center">
+              <img 
+                src={viewingReceipt} 
+                alt="Beleg" 
+                className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                onClick={e => e.stopPropagation()}
+              />
+              <button 
+                onClick={() => setViewingReceipt(null)}
+                className="mt-4 px-6 py-2.5 bg-white text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-lg"
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
+        )}
 
-      <FullScreenTableView 
-        isOpen={isFullScreen}
-        onClose={() => setIsFullScreen(false)}
-        filteredMealEntries={filteredMealEntries}
-        mileageEntries={mileageEntries}
-        selectedYear={selectedYear}
-      />
+        <MonthlyExpenseModal 
+          isOpen={showExpenseModal}
+          onClose={() => setShowExpenseModal(false)}
+          selectedMonth={expenseMonth?.month}
+          expenseAmount={expenseAmount}
+          setExpenseAmount={setExpenseAmount}
+          handleSaveExpense={saveMonthlyExpense}
+          monthlyDeductible={monthlyDeductible}
+        />
+
+        <FullScreenTableView 
+          isOpen={isFullScreen}
+          onClose={() => setIsFullScreen(false)}
+          filteredMealEntries={filteredMealEntries}
+          mileageEntries={mileageEntries}
+          selectedYear={selectedYear}
+        />
+      </div>
     </div>
   );
 }
