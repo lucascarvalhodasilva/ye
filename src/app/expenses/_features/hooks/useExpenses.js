@@ -16,6 +16,7 @@ export const useExpenses = () => {
   // Receipt State
   const [tempExpenseReceipt, setTempExpenseReceipt] = useState(null);
   const [tempExpenseReceiptPath, setTempExpenseReceiptPath] = useState(null);
+  const [tempExpenseReceiptType, setTempExpenseReceiptType] = useState('image'); // 'image' or 'pdf'
   const [showExpenseCameraOptions, setShowExpenseCameraOptions] = useState(false);
   const [viewingReceipt, setViewingReceipt] = useState(null);
   
@@ -48,10 +49,69 @@ export const useExpenses = () => {
       // 2. Use for preview and store path
       setTempExpenseReceipt(image.base64String);
       setTempExpenseReceiptPath(tempPath);
+      setTempExpenseReceiptType('image');
       setShowExpenseCameraOptions(false);
     } catch (error) {
       console.error('Camera error:', error);
     }
+  };
+
+  // Pick file from file system (including cloud storage on Android)
+  const pickExpenseFile = () => {
+    return new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,.pdf';
+      input.style.display = 'none';
+      
+      input.onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            const base64 = event.target.result.split(',')[1]; // Remove data URL prefix
+            
+            // Save to Cache temporarily
+            const timestamp = Date.now();
+            const extension = file.name.split('.').pop() || 'jpg';
+            const tempFileName = `tmp_receipt_${timestamp}.${extension}`;
+            const tempPath = `temp/expenses/${tempFileName}`;
+
+            await Filesystem.writeFile({
+              path: tempPath,
+              data: base64,
+              directory: Directory.Cache,
+              recursive: true
+            });
+
+            setTempExpenseReceipt(base64);
+            setTempExpenseReceiptPath(tempPath);
+            setTempExpenseReceiptType(extension.toLowerCase() === 'pdf' ? 'pdf' : 'image');
+            setShowExpenseCameraOptions(false);
+            resolve(base64);
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {
+          console.error('File picker error:', error);
+          resolve(null);
+        }
+        
+        document.body.removeChild(input);
+      };
+
+      input.oncancel = () => {
+        document.body.removeChild(input);
+        resolve(null);
+      };
+
+      document.body.appendChild(input);
+      input.click();
+    });
   };
 
   const removeExpenseReceipt = async () => {
@@ -67,6 +127,7 @@ export const useExpenses = () => {
     }
     setTempExpenseReceipt(null);
     setTempExpenseReceiptPath(null);
+    setTempExpenseReceiptType('image');
   };
 
   const saveExpenseReceiptFinal = async (entryId, dateStr) => {
@@ -312,9 +373,11 @@ export const useExpenses = () => {
     submitError,
     // Receipt props
     tempExpenseReceipt,
+    tempExpenseReceiptType,
     showExpenseCameraOptions,
     setShowExpenseCameraOptions,
     takeExpensePicture,
+    pickExpenseFile,
     removeExpenseReceipt,
     viewingReceipt,
     setViewingReceipt,

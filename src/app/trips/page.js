@@ -23,9 +23,9 @@ export default function TripsPage() {
     setAutoAddStationTrips,
     submitError,
     tempPublicTransportReceipt,
-    showPublicTransportCameraOptions,
-    setShowPublicTransportCameraOptions,
+    tempPublicTransportReceiptType,
     takePublicTransportPicture,
+    pickPublicTransportFile,
     removePublicTransportReceipt,
     editingId,
     startEdit,
@@ -114,6 +114,15 @@ export default function TripsPage() {
       >
         {/* Full Width Content */}
         <div className="flex flex-col gap-6">
+          <BalanceSheetScroller 
+            filteredMonthlyExpenses={filteredMonthlyExpenses}
+            filteredMealEntries={filteredMealEntries}
+            mileageEntries={mileageEntries}
+            selectedYear={selectedYear}
+            handleClickWrapper={handleClickWrapper}
+            handleMonthClick={handleMonthClick}
+          />
+
           <TripList 
             filteredMealEntries={filteredMealEntries}
             mileageEntries={mileageEntries}
@@ -127,15 +136,6 @@ export default function TripsPage() {
               setShowTripModal(true);
             }}
             onAddTrip={() => setShowTripModal(true)}
-          />
-
-          <BalanceSheetScroller 
-            filteredMonthlyExpenses={filteredMonthlyExpenses}
-            filteredMealEntries={filteredMealEntries}
-            mileageEntries={mileageEntries}
-            selectedYear={selectedYear}
-            handleClickWrapper={handleClickWrapper}
-            handleMonthClick={handleMonthClick}
           />
         </div>
 
@@ -157,12 +157,12 @@ export default function TripsPage() {
                 editingId={editingId}
                 cancelEdit={handleModalClose}
                 hasChanges={hasChanges}
-              tempPublicTransportReceipt={tempPublicTransportReceipt}
-              showPublicTransportCameraOptions={showPublicTransportCameraOptions}
-              setShowPublicTransportCameraOptions={setShowPublicTransportCameraOptions}
-              takePublicTransportPicture={takePublicTransportPicture}
-              removePublicTransportReceipt={removePublicTransportReceipt}
-            />
+                tempPublicTransportReceipt={tempPublicTransportReceipt}
+                tempPublicTransportReceiptType={tempPublicTransportReceiptType}
+                takePublicTransportPicture={takePublicTransportPicture}
+                pickPublicTransportFile={pickPublicTransportFile}
+                removePublicTransportReceipt={removePublicTransportReceipt}
+              />
           </div>
         </div>
       )}

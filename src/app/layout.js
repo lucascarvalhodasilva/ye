@@ -39,7 +39,7 @@ export default function RootLayout({ children }) {
       >
         <AppProvider>
           <Navbar />
-          <main className="w-full max-w-4xl px-4">
+          <main className="w-full max-w-4xl">
             {children}
           </main>
         </AppProvider>

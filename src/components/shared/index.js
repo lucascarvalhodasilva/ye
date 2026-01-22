@@ -10,6 +10,8 @@ export { default as NativeDateInput } from './NativeDateInput';
 export { default as NativeTimeInput } from './NativeTimeInput';
 export { default as NumberInput } from './NumberInput';
 export { default as SuggestionInput } from './SuggestionInput';
+export { default as ReceiptUpload } from './ReceiptUpload';
+export { default as PDFViewer, base64ToUint8Array } from './PDFViewer';
 export { 
   default as TransportModeSelector,
   DistanceSlider,

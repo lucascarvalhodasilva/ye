@@ -6,12 +6,12 @@ import { useAppContext } from '@/context/AppContext';
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { selectedYear, setSelectedYear } = useAppContext();
+  const { selectedYear, setSelectedYear, getAvailableYears } = useAppContext();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - 1 + i); // [2024, 2025, 2026, 2027, 2028] 
+  // Get years that have data + current year
+  const years = getAvailableYears ? getAvailableYears() : [new Date().getFullYear()];
 
   // Close dropdown when clicking outside
   useEffect(() => {

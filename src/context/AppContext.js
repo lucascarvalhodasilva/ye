@@ -425,7 +425,40 @@ export function AppProvider({ children }) {
       defaultCommute, setDefaultCommute,
       taxRates, setTaxRates, getMileageRate,
       selectedYear, setSelectedYear,
-      importData
+      importData,
+      // Computed: years with data + current year
+      getAvailableYears: () => {
+        const currentYear = new Date().getFullYear();
+        const yearsSet = new Set([currentYear]);
+        
+        // Extract years from meal entries
+        mealEntries.forEach(entry => {
+          if (entry.date) yearsSet.add(new Date(entry.date).getFullYear());
+          if (entry.endDate) yearsSet.add(new Date(entry.endDate).getFullYear());
+        });
+        
+        // Extract years from mileage entries
+        mileageEntries.forEach(entry => {
+          if (entry.date) yearsSet.add(new Date(entry.date).getFullYear());
+        });
+        
+        // Extract years from expense entries
+        expenseEntries.forEach(entry => {
+          if (entry.date) yearsSet.add(new Date(entry.date).getFullYear());
+        });
+        
+        // Extract years from equipment entries
+        equipmentEntries.forEach(entry => {
+          if (entry.purchaseDate) yearsSet.add(new Date(entry.purchaseDate).getFullYear());
+        });
+        
+        // Extract years from monthly employer expenses
+        monthlyEmployerExpenses.forEach(entry => {
+          if (entry.year) yearsSet.add(parseInt(entry.year));
+        });
+        
+        return Array.from(yearsSet).sort((a, b) => b - a); // Sort descending (newest first)
+      }
     }}>
       {children}
     </AppContext.Provider>

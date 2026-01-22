@@ -37,7 +37,7 @@ export const useTripForm = () => {
   const [autoAddStationTrips, setAutoAddStationTrips] = useState(true);
   const [tempPublicTransportReceipt, setTempPublicTransportReceipt] = useState(null);
   const [tempPublicTransportReceiptPath, setTempPublicTransportReceiptPath] = useState(null);
-  const [showPublicTransportCameraOptions, setShowPublicTransportCameraOptions] = useState(false);
+  const [tempPublicTransportReceiptType, setTempPublicTransportReceiptType] = useState('image'); // 'image' or 'pdf'
   const [editingId, setEditingId] = useState(null);
   const [initialEditData, setInitialEditData] = useState(null);
   const [initialReceiptPath, setInitialReceiptPath] = useState(null);
@@ -130,10 +130,67 @@ export const useTripForm = () => {
       // 2. Use for preview and store path
       setTempPublicTransportReceipt(image.base64String);
       setTempPublicTransportReceiptPath(tempPath);
-      setShowPublicTransportCameraOptions(false);
+      setTempPublicTransportReceiptType('image');
     } catch (error) {
       console.error('Camera error:', error);
     }
+  };
+
+  // Pick file from file system (including cloud storage on Android)
+  const pickPublicTransportFile = () => {
+    return new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*,.pdf';
+      input.style.display = 'none';
+      
+      input.onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            const base64 = event.target.result.split(',')[1]; // Remove data URL prefix
+            
+            // Save to Cache temporarily
+            const timestamp = Date.now();
+            const extension = file.name.split('.').pop() || 'jpg';
+            const tempFileName = `tmp_receipt_${timestamp}.${extension}`;
+            const tempPath = `temp/transport/${tempFileName}`;
+
+            await Filesystem.writeFile({
+              path: tempPath,
+              data: base64,
+              directory: Directory.Cache,
+              recursive: true
+            });
+
+            setTempPublicTransportReceipt(base64);
+            setTempPublicTransportReceiptPath(tempPath);
+            setTempPublicTransportReceiptType(extension.toLowerCase() === 'pdf' ? 'pdf' : 'image');
+            resolve(base64);
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {
+          console.error('File picker error:', error);
+          resolve(null);
+        }
+        
+        document.body.removeChild(input);
+      };
+
+      input.oncancel = () => {
+        document.body.removeChild(input);
+        resolve(null);
+      };
+
+      document.body.appendChild(input);
+      input.click();
+    });
   };
 
   const removePublicTransportReceipt = async () => {
@@ -149,6 +206,7 @@ export const useTripForm = () => {
     }
     setTempPublicTransportReceipt(null);
     setTempPublicTransportReceiptPath(null);
+    setTempPublicTransportReceiptType('image');
   };
 
   const savePublicTransportReceiptFinal = async (tripId, dateStr) => {
@@ -214,6 +272,23 @@ export const useTripForm = () => {
 
     if (startDate === endDate && formData.endTime <= formData.startTime) {
       setSubmitError("Die Endzeit muss nach der Startzeit liegen.");
+      return;
+    }
+
+    // Validation: Minimum 8 hours duration for allowance eligibility
+    const tripStart = new Date(`${startDate}T${formData.startTime}`);
+    let tripEndDate = endDate;
+    // If end time is before start time on same day, assume next day
+    if (startDate === endDate && formData.endTime <= formData.startTime) {
+      const nextDay = new Date(startDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      tripEndDate = nextDay.toISOString().split('T')[0];
+    }
+    const tripEnd = new Date(`${tripEndDate}T${formData.endTime}`);
+    const durationInHours = (tripEnd - tripStart) / (1000 * 60 * 60);
+    
+    if (durationInHours < 8) {
+      setSubmitError("Die Reisedauer muss mindestens 8 Stunden betragen, um eine Pauschale zu erhalten.");
       return;
     }
 
@@ -463,9 +538,9 @@ export const useTripForm = () => {
     setAutoAddStationTrips,
     submitError,
     tempPublicTransportReceipt,
-    showPublicTransportCameraOptions,
-    setShowPublicTransportCameraOptions,
+    tempPublicTransportReceiptType,
     takePublicTransportPicture,
+    pickPublicTransportFile,
     removePublicTransportReceipt,
     editingId,
     startEdit,

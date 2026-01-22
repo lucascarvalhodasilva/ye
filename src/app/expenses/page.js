@@ -21,9 +21,11 @@ export default function ExpensesPage() {
     setIsFullScreen,
     submitError,
     tempExpenseReceipt,
+    tempExpenseReceiptType,
     showExpenseCameraOptions,
     setShowExpenseCameraOptions,
     takeExpensePicture,
+    pickExpenseFile,
     removeExpenseReceipt,
     viewingReceipt,
     setViewingReceipt,
@@ -109,9 +111,9 @@ export default function ExpensesPage() {
                 handleSubmit={handleFormSubmit}
                 submitError={submitError}
                 tempExpenseReceipt={tempExpenseReceipt}
-                showExpenseCameraOptions={showExpenseCameraOptions}
-                setShowExpenseCameraOptions={setShowExpenseCameraOptions}
+                tempExpenseReceiptType={tempExpenseReceiptType}
                 takeExpensePicture={takeExpensePicture}
+                pickExpenseFile={pickExpenseFile}
                 removeExpenseReceipt={removeExpenseReceipt}
                 editingId={editingId}
                 cancelEdit={handleModalClose}

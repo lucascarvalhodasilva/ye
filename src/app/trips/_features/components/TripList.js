@@ -56,7 +56,28 @@ export default function TripList({
 }) {
   const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, entry: null });
   const [openSwipeId, setOpenSwipeId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const swipeState = useRef({ id: null, startX: 0, translateX: 0, dragging: false });
+  
+  const ITEMS_PER_PAGE = 10;
+  const totalPages = Math.ceil(filteredMealEntries.length / ITEMS_PER_PAGE);
+  
+  // Get current page entries
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentEntries = filteredMealEntries.slice(startIndex, endIndex);
+  
+  // Reset to page 1 when year changes or entries change significantly
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedYear]);
+  
+  // Ensure current page is valid
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
   
   useEffect(() => {
     if (highlightId) {
@@ -177,7 +198,7 @@ export default function TripList({
             <p className="text-xs text-muted-foreground/60 mt-1">Fügen Sie Ihre erste Dienstreise hinzu</p>
           </div>
         ) : (
-          filteredMealEntries.map((entry, index) => {
+          currentEntries.map((entry, index) => {
             const isMultiDay = entry.endDate && entry.endDate !== entry.date;
             
             // Calculate totals (prioritize relatedMealId, fallback to date)
@@ -334,12 +355,54 @@ export default function TripList({
         )}
       </div>
 
-      {/* Footer hint */}
+      {/* Footer with Pagination */}
       {filteredMealEntries.length > 0 && (
         <div className="p-3 bg-muted/20 border-t border-border/30">
-          <p className="text-[10px] text-muted-foreground/60 text-center">
-            ← Nach links wischen zum Bearbeiten oder Löschen
-          </p>
+          {totalPages > 1 ? (
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white/60 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 text-muted-foreground hover:text-foreground border border-border/50"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Zurück
+              </button>
+              
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
+                      currentPage === page
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-white/60 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 text-muted-foreground hover:text-foreground border border-border/50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-white/60 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 text-muted-foreground hover:text-foreground border border-border/50"
+              >
+                Weiter
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <p className="text-[10px] text-muted-foreground/60 text-center">
+              ← Nach links wischen zum Bearbeiten oder Löschen
+            </p>
+          )}
         </div>
       )}
 

@@ -3,7 +3,7 @@ import NumberInput from '@/components/shared/NumberInput';
 import CustomDateRangePicker from '@/components/shared/CustomDateRangePicker';
 import CustomTimePicker from '@/components/shared/CustomTimePicker';
 import TransportModeSelector, { DistanceSlider } from '@/components/shared/TransportModeSelector';
-import { CameraSource } from '@capacitor/camera';
+import ReceiptUpload from '@/components/shared/ReceiptUpload';
 import { Calendar } from 'lucide-react';
 
 /**
@@ -32,10 +32,10 @@ import { Calendar } from 'lucide-react';
  * @property {Function} cancelEdit - Function to cancel editing
  * @property {boolean} hasChanges - Whether form has unsaved changes
  * @property {string} [tempPublicTransportReceipt] - Base64 receipt image
- * @property {boolean} showPublicTransportCameraOptions - Whether to show camera options modal
- * @property {Function} setShowPublicTransportCameraOptions - Toggle camera options modal
  * @property {Function} takePublicTransportPicture - Function to capture receipt photo
+ * @property {Function} pickPublicTransportFile - Function to pick file from file system
  * @property {Function} removePublicTransportReceipt - Function to remove receipt
+ * @property {string} [tempPublicTransportReceiptType] - Type of receipt ('image' or 'pdf')
  */
 
 /**
@@ -54,9 +54,9 @@ export default function TripForm({
   cancelEdit,
   hasChanges,
   tempPublicTransportReceipt,
-  showPublicTransportCameraOptions,
-  setShowPublicTransportCameraOptions,
+  tempPublicTransportReceiptType = 'image',
   takePublicTransportPicture,
+  pickPublicTransportFile,
   removePublicTransportReceipt
 }) {
   const formRef = useRef(null);
@@ -292,42 +292,15 @@ export default function TripForm({
               </div>
 
               {/* Receipt Upload Section */}
-              <div>
-                <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide block mb-1.5">Beleg (optional)</label>
-                {!tempPublicTransportReceipt ? (
-                  <button 
-                    type="button" 
-                    onClick={() => setShowPublicTransportCameraOptions(true)} 
-                    className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-border/50 hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary transition-all flex items-center justify-center gap-2 text-xs font-medium"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Beleg fotografieren
-                  </button>
-                ) : (
-                  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/50 group">
-                    <img 
-                      src={`data:image/jpeg;base64,${tempPublicTransportReceipt}`} 
-                      alt="Beleg Vorschau" 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button 
-                        type="button" 
-                        onClick={removePublicTransportReceipt}
-                        className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg flex items-center gap-1.5 transition-colors"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Entfernen
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <ReceiptUpload
+                receipt={tempPublicTransportReceipt}
+                receiptType={tempPublicTransportReceiptType}
+                onTakePicture={takePublicTransportPicture}
+                onPickFile={pickPublicTransportFile}
+                onRemove={removePublicTransportReceipt}
+                accentColor="purple"
+                label="Beleg (optional)"
+              />
             </div>
           )}
         </div>
@@ -376,68 +349,6 @@ export default function TripForm({
           )}
         </button>
       </div>
-
-      {/* Camera Options Modal */}
-      {showPublicTransportCameraOptions && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-md shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-muted/30">
-              <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">Beleg hinzufügen</h3>
-                <p className="text-[10px] text-muted-foreground">Wählen Sie eine Quelle</p>
-              </div>
-            </div>
-            
-            <div className="p-4 space-y-2">
-              <button
-                onClick={() => takePublicTransportPicture && takePublicTransportPicture(CameraSource.Camera)}
-                className="w-full p-4 rounded-xl bg-white/60 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-border/50 flex items-center gap-4 transition-all group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <span className="text-sm font-medium text-foreground block">Kamera</span>
-                  <span className="text-[10px] text-muted-foreground">Foto aufnehmen</span>
-                </div>
-              </button>
-              
-              <button
-                onClick={() => takePublicTransportPicture && takePublicTransportPicture(CameraSource.Photos)}
-                className="w-full p-4 rounded-xl bg-white/60 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-border/50 flex items-center gap-4 transition-all group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <span className="text-sm font-medium text-foreground block">Galerie</span>
-                  <span className="text-[10px] text-muted-foreground">Bild auswählen</span>
-                </div>
-              </button>
-            </div>
-            
-            <div className="p-4 border-t border-border/50 bg-muted/30">
-              <button
-                onClick={() => setShowPublicTransportCameraOptions(false)}
-                className="w-full px-4 py-2.5 rounded-xl bg-white/60 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-border/50 text-sm font-medium text-muted-foreground hover:text-foreground transition-all"
-              >
-                Abbrechen
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

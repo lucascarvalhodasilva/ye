@@ -124,7 +124,7 @@ export default function BalanceSheetScroller({
         </div>
 
         {/* Income vs Expenses Summary */}
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-300/40 dark:bg-gray/5">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
@@ -182,10 +182,10 @@ export default function BalanceSheetScroller({
                   if (handleClickWrapper) handleClickWrapper(month);
                   else if (handleMonthClick) handleMonthClick(month);
                 }}
-                className={`flex-none w-36 rounded-xl p-4 flex flex-col gap-3 transition-all duration-200 snap-start text-left select-none group border ${
+                className={`flex-none w-36 rounded-xl p-4 flex flex-col gap-3 transition-all duration-200 snap-start text-left select-none group border-2 border-dashed ${
                   isPositive 
-                    ? 'bg-white/60 dark:bg-white/5 border-border/50 hover:border-emerald-300 dark:hover:border-emerald-500/30' 
-                    : 'bg-red-50/50 dark:bg-red-500/5 border-red-200/50 dark:border-red-500/20 hover:border-red-300 dark:hover:border-red-500/30'
+                    ? 'bg-emerald-500/5 dark:bg-emerald-500/5 border-emerald-500/50 hover:border-emerald-500/70 hover:bg-emerald-500/10' 
+                    : 'bg-red-500/5 dark:bg-red-500/5 border-red-500/50 hover:border-red-500/70 hover:bg-red-500/10'
                 } hover:shadow-md`}
               >
                 {/* Month Header */}
