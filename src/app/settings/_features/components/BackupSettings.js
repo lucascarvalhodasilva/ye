@@ -336,6 +336,19 @@ export default function BackupSettings() {
       try {
         const base64 = await entry.async('string'); // stored as base64 string
         const name = entry.name.replace(/^receipts\//, '');
+        
+        // Validate filename for security: prevent path traversal attacks
+        if (name.includes('/') || name.includes('\\') || name.includes('..')) {
+          console.warn(`Invalid filename in backup (path traversal attempt): ${entry.name}`);
+          continue;
+        }
+        
+        // Validate filename pattern: only allow safe characters and valid extensions
+        if (!/^[\w\-]+\.(jpg|jpeg|png|pdf|gif|webp)$/i.test(name)) {
+          console.warn(`Invalid filename pattern in backup: ${name}`);
+          continue;
+        }
+        
         await Filesystem.writeFile({
           path: `receipts/${name}`,
           data: base64,
