@@ -63,7 +63,8 @@ export default function EquipmentPage() {
     setIsFullScreen,
     viewingReceipt,
     setViewingReceipt,
-    handleViewReceipt
+    handleViewReceipt,
+    generateDepreciationSchedule
   } = useEquipmentList();
 
   const totalDeductible = filteredEquipmentEntries.reduce((sum, entry) => sum + (entry.deductibleAmount || 0), 0);
@@ -88,6 +89,7 @@ export default function EquipmentPage() {
               setShowEquipmentModal(true);
             }}
             onAddEquipment={() => setShowEquipmentModal(true)}
+            generateDepreciationSchedule={generateDepreciationSchedule}
           />
         </div>
 

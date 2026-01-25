@@ -172,10 +172,10 @@ const generateMockData = (currentYear) => {
   ];
 
   const mockEquipmentEntries = [
-    { id: 4001, date: `${currentYear}-01-10`, name: 'Laptop Dell XPS 15', amount: 1899.00, category: 'IT-Ausstattung', depreciationYears: 3 },
-    { id: 4002, date: `${currentYear}-02-15`, name: 'Monitor 27" 4K', amount: 449.00, category: 'IT-Ausstattung', depreciationYears: 0 },
-    { id: 4003, date: `${currentYear}-03-20`, name: 'Bürostuhl ergonomisch', amount: 650.00, category: 'Büromöbel', depreciationYears: 0 },
-    { id: 4004, date: `${currentYear}-04-05`, name: 'Externe Festplatte 2TB', amount: 89.00, category: 'IT-Ausstattung', depreciationYears: 0 }
+    { id: 4001, date: `${currentYear}-01-10`, name: 'Laptop Dell XPS 15', price: 1899.00, category: 'IT-Ausstattung', depreciationYears: 3 },
+    { id: 4002, date: `${currentYear}-02-15`, name: 'Monitor 27" 4K', price: 449.00, category: 'IT-Ausstattung', depreciationYears: 0 },
+    { id: 4003, date: `${currentYear}-03-20`, name: 'Bürostuhl ergonomisch', price: 650.00, category: 'Büromöbel', depreciationYears: 0 },
+    { id: 4004, date: `${currentYear}-04-05`, name: 'Externe Festplatte 2TB', price: 89.00, category: 'IT-Ausstattung', depreciationYears: 0 }
   ];
 
   const mockExpenseEntries = [
@@ -464,9 +464,39 @@ export function AppProvider({ children }) {
           if (entry.date) yearsSet.add(new Date(entry.date).getFullYear());
         });
         
-        // Extract years from equipment entries
+        // Extract years from equipment entries - include all depreciation years
         equipmentEntries.forEach(entry => {
-          if (entry.purchaseDate) yearsSet.add(new Date(entry.purchaseDate).getFullYear());
+          if (entry.date) {
+            const purchaseDate = new Date(entry.date);
+            const purchaseYear = purchaseDate.getFullYear();
+            const price = parseFloat(entry.price);
+            const gwgLimit = taxRates?.gwgLimit || 952;
+            
+            // GWG items: only purchase year
+            if (price <= gwgLimit) {
+              yearsSet.add(purchaseYear);
+            } else {
+              // Depreciating assets: add all years with depreciation
+              const usefulLifeYears = 3;
+              const endYear = purchaseYear + usefulLifeYears;
+              
+              for (let year = purchaseYear; year <= endYear; year++) {
+                // Calculate months for this year
+                let monthsInYear = 0;
+                if (year === purchaseYear) {
+                  monthsInYear = 12 - purchaseDate.getMonth();
+                } else if (year < endYear) {
+                  monthsInYear = 12;
+                } else if (year === endYear) {
+                  monthsInYear = purchaseDate.getMonth();
+                }
+                
+                if (monthsInYear > 0) {
+                  yearsSet.add(year);
+                }
+              }
+            }
+          }
         });
         
         // Extract years from monthly employer expenses

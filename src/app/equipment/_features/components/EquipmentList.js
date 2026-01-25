@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { formatDate } from '@/utils/dateFormatter';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
+import DepreciationScheduleView from './DepreciationScheduleView';
 
 export default function EquipmentList({ 
   filteredEquipmentEntries, 
@@ -10,12 +11,14 @@ export default function EquipmentList({
   handleViewReceipt,
   highlightId,
   onEdit,
-  onAddEquipment
+  onAddEquipment,
+  generateDepreciationSchedule
 }) {
   const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, entry: null });
   const [openSwipeId, setOpenSwipeId] = useState(null);
   const [collapsedMonths, setCollapsedMonths] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedScheduleId, setExpandedScheduleId] = useState(null);
   const swipeState = useRef({ id: null, startX: 0, translateX: 0, dragging: false });
 
   const toggleMonth = (key) => {
@@ -219,8 +222,35 @@ export default function EquipmentList({
                   </svg>
                 </button>
               )}
+              
+              {/* Toggle Schedule Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedScheduleId(expandedScheduleId === entry.id ? null : entry.id);
+                }}
+                className={`w-8 h-8 rounded-lg transition-colors flex items-center justify-center ${
+                  expandedScheduleId === entry.id
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-blue-500/10 text-blue-600 hover:bg-blue-500/20'
+                }`}
+                aria-label="Abschreibungsplan anzeigen"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </button>
             </div>
           </div>
+          
+          {/* Depreciation Schedule View */}
+          {expandedScheduleId === entry.id && generateDepreciationSchedule && (
+            <DepreciationScheduleView
+              item={entry}
+              schedule={generateDepreciationSchedule(entry)}
+              selectedYear={selectedYear}
+            />
+          )}
         </div>
       </div>
     );
