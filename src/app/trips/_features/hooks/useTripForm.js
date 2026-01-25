@@ -153,6 +153,14 @@ export const useTripForm = () => {
           return;
         }
 
+        // Validate file size and type
+        const validation = validateFile(file);
+        if (!validation.valid) {
+          alert(validation.error);
+          resolve(null);
+          return;
+        }
+
         try {
           const reader = new FileReader();
           reader.onload = async (event) => {
@@ -160,8 +168,7 @@ export const useTripForm = () => {
             
             // Save to Cache temporarily
             const timestamp = Date.now();
-            const extension = file.name.split('.').pop() || 'jpg';
-            const tempFileName = `tmp_receipt_${timestamp}.${extension}`;
+            const tempFileName = `tmp_receipt_${timestamp}.${validation.extension}`;
             const tempPath = `temp/transport/${tempFileName}`;
 
             await Filesystem.writeFile({
@@ -173,7 +180,7 @@ export const useTripForm = () => {
 
             setTempPublicTransportReceipt(base64);
             setTempPublicTransportReceiptPath(tempPath);
-            setTempPublicTransportReceiptType(extension.toLowerCase() === 'pdf' ? 'pdf' : 'image');
+            setTempPublicTransportReceiptType(validation.extension === 'pdf' ? 'pdf' : 'image');
             resolve(base64);
           };
           reader.readAsDataURL(file);

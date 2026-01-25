@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { validateFile } from '@/utils/fileValidation';
 
 export const useExpenses = () => {
   const { expenseEntries, addExpenseEntry, deleteExpenseEntry, selectedYear } = useAppContext();
@@ -72,6 +73,14 @@ export const useExpenses = () => {
           return;
         }
 
+        // Validate file size and type
+        const validation = validateFile(file);
+        if (!validation.valid) {
+          alert(validation.error);
+          resolve(null);
+          return;
+        }
+
         try {
           const reader = new FileReader();
           reader.onload = async (event) => {
@@ -79,8 +88,7 @@ export const useExpenses = () => {
             
             // Save to Cache temporarily
             const timestamp = Date.now();
-            const extension = file.name.split('.').pop() || 'jpg';
-            const tempFileName = `tmp_receipt_${timestamp}.${extension}`;
+            const tempFileName = `tmp_receipt_${timestamp}.${validation.extension}`;
             const tempPath = `temp/expenses/${tempFileName}`;
 
             await Filesystem.writeFile({
@@ -92,7 +100,7 @@ export const useExpenses = () => {
 
             setTempExpenseReceipt(base64);
             setTempExpenseReceiptPath(tempPath);
-            setTempExpenseReceiptType(extension.toLowerCase() === 'pdf' ? 'pdf' : 'image');
+            setTempExpenseReceiptType(validation.extension === 'pdf' ? 'pdf' : 'image');
             setShowExpenseCameraOptions(false);
             resolve(base64);
           };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAppContext } from '@/context/AppContext';
 import { Camera, CameraResultType } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { validateFile } from '@/utils/fileValidation';
 
 export const useEquipmentForm = () => {
   const { addEquipmentEntry, updateEquipmentEntry, equipmentEntries, deleteEquipmentEntry, taxRates } = useAppContext();
@@ -72,18 +73,10 @@ export const useEquipmentForm = () => {
           return;
         }
 
-        // Validate MIME type against whitelist
-        const allowedTypes = [
-          'image/jpeg',
-          'image/png', 
-          'image/gif',
-          'image/webp',
-          'application/pdf'
-        ];
-
-        if (!allowedTypes.includes(file.type)) {
-          console.error('Invalid file type:', file.type);
-          alert('Please upload only images (JPG, PNG, GIF, WebP) or PDF files.');
+        // Validate file size and type
+        const validation = validateFile(file);
+        if (!validation.valid) {
+          alert(validation.error);
           resolve(null);
           return;
         }
@@ -95,18 +88,7 @@ export const useEquipmentForm = () => {
             
             // Save to Cache temporarily
             const timestamp = Date.now();
-            
-            // Derive extension from validated MIME type
-            const extensionMap = {
-              'image/jpeg': 'jpg',
-              'image/png': 'png',
-              'image/gif': 'gif',
-              'image/webp': 'webp',
-              'application/pdf': 'pdf'
-            };
-            
-            const extension = extensionMap[file.type] || 'jpg';
-            const tempFileName = `tmp_receipt_${timestamp}.${extension}`;
+            const tempFileName = `tmp_receipt_${timestamp}.${validation.extension}`;
             const tempPath = `temp/equipment/${tempFileName}`;
 
             await Filesystem.writeFile({
@@ -118,7 +100,7 @@ export const useEquipmentForm = () => {
 
             setTempReceipt(base64);
             setTempReceiptPath(tempPath);
-            setTempReceiptType(extension === 'pdf' ? 'pdf' : 'image');
+            setTempReceiptType(validation.extension === 'pdf' ? 'pdf' : 'image');
             resolve(base64);
           };
           reader.readAsDataURL(file);
