@@ -141,7 +141,7 @@ export default function MonthlyExpenseModal({
           </button>
           <button
             onClick={handleSaveExpense}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition-all text-sm shadow-sm"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-primary !text-white font-medium hover:bg-primary/90 transition-all text-sm shadow-sm"
           >
             Speichern
           </button>

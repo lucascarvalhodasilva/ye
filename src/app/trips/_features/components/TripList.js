@@ -297,7 +297,7 @@ export default function TripList({
         {onAddTrip && (
           <button 
             onClick={onAddTrip}
-            className="h-12 px-5 rounded-xl bg-primary text-white transition-all shadow-sm flex items-center justify-center text-base font-medium"
+            className="h-12 px-5 rounded-xl bg-primary !text-white transition-all shadow-sm flex items-center justify-center text-base font-medium"
           >
             Hinzufügen
           </button>

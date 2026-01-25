@@ -373,8 +373,8 @@ export default function TripForm({
             (editingId && !hasChanges) || isSubmitting
               ? 'bg-muted text-muted-foreground cursor-not-allowed' 
               : editingId
-                ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                : 'bg-primary hover:bg-primary/90 text-white'
+                ? 'bg-amber-500 hover:bg-amber-600 !text-white'
+                : 'bg-primary hover:bg-primary/90 !text-white'
           }`}
         >
           {editingId ? (
