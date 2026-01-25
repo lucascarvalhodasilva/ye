@@ -89,7 +89,9 @@ export default function SpesenQuickAdd({ year, onAdd, existingSpesen }) {
   return (
     <div className="bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-100 rounded-2xl p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-lg">➕</span>
+        <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
         <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
           Schnell hinzufügen
         </h3>

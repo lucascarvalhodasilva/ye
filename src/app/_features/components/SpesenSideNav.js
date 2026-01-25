@@ -121,12 +121,12 @@ export default function SpesenSideNav({ isOpen, onClose, year }) {
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity"
         onClick={handleBackdropClick}
       >
         {/* Side Nav Panel */}
         <div 
-          className="fixed left-0 top-0 bottom-0 w-[80%] min-w-[320px] max-w-[500px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-y-auto z-50 animate-slideInLeft"
+          className="fixed left-0 top-0 bottom-0 w-[80%] min-w-[320px] max-w-[500px] bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-y-auto z-[70] animate-slideInLeft"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -134,7 +134,9 @@ export default function SpesenSideNav({ isOpen, onClose, year }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-sm">
-                  <span className="text-xl">💶</span>
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 tracking-tight">Monatliche Spesen</h2>
@@ -157,7 +159,9 @@ export default function SpesenSideNav({ isOpen, onClose, year }) {
             {/* Year Overview */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">📊</span>
+                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
                 <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
                   Jahresübersicht
                 </h3>
@@ -188,7 +192,9 @@ export default function SpesenSideNav({ isOpen, onClose, year }) {
             {/* Monthly Entries */}
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">📅</span>
+                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
                 <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
                   Monatliche Einträge
                 </h3>
@@ -274,7 +280,9 @@ export default function SpesenSideNav({ isOpen, onClose, year }) {
                                       className="p-1.5 hover:bg-yellow-100 rounded-lg transition-colors"
                                       title="Bearbeiten"
                                     >
-                                      <span className="text-base">✏️</span>
+                                      <svg className="w-4 h-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                      </svg>
                                     </button>
                                     <button
                                       onClick={() => handleDelete(spesen.id)}
