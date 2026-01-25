@@ -249,7 +249,7 @@ const CustomDateRangePicker = forwardRef(function CustomDateRangePicker({
                 className={`
                   flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all
                   ${selectionMode === 'start' 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    ? 'bg-primary text-white shadow-md' 
                     : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }
                 `}
@@ -264,7 +264,7 @@ const CustomDateRangePicker = forwardRef(function CustomDateRangePicker({
                 className={`
                   flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all
                   ${selectionMode === 'end' 
-                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    ? 'bg-primary text-white shadow-md' 
                     : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                   }
                   ${!previewStart ? 'opacity-50 cursor-not-allowed' : ''}
@@ -348,11 +348,11 @@ const CustomDateRangePicker = forwardRef(function CustomDateRangePicker({
                       text-sm font-medium
                       transition-all duration-200
                       ${isStart 
-                        ? 'bg-primary text-primary-foreground rounded-r-none shadow-md z-10' 
+                        ? 'bg-primary text-white rounded-r-none shadow-md z-10' 
                         : ''
                       }
                       ${isEnd 
-                        ? 'bg-primary text-primary-foreground rounded-l-none shadow-md z-10' 
+                        ? 'bg-primary text-white rounded-l-none shadow-md z-10' 
                         : ''
                       }
                       ${isStart && isEnd 
@@ -414,7 +414,7 @@ const CustomDateRangePicker = forwardRef(function CustomDateRangePicker({
                     flex-1 py-3 text-center text-sm font-medium rounded-lg transition-all
                     flex items-center justify-center gap-2
                     ${previewStart 
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-md' 
+                      ? 'bg-primary text-white hover:bg-primary/90 shadow-md' 
                       : 'bg-muted text-muted-foreground cursor-not-allowed'
                     }
                   `}

@@ -209,7 +209,7 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
                       text-sm font-medium
                       transition-all duration-200
                       ${isPreview 
-                        ? 'bg-primary text-primary-foreground shadow-lg scale-110 ring-2 ring-primary ring-offset-2 ring-offset-card' 
+                        ? 'bg-primary text-white shadow-lg scale-110 ring-2 ring-primary ring-offset-2 ring-offset-card' 
                         : ''
                       }
                       ${isSelected && !isPreview
@@ -275,7 +275,7 @@ export default function CustomDatePicker({ value, onChange, className = "", min,
                     flex-1 py-3 text-center text-sm font-medium rounded-lg transition-all
                     flex items-center justify-center gap-2
                     ${previewDate 
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-md' 
+                      ? 'bg-primary text-white hover:bg-primary/90 shadow-md' 
                       : 'bg-muted text-muted-foreground cursor-not-allowed'
                     }
                   `}

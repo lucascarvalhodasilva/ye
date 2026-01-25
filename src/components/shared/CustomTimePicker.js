@@ -307,7 +307,7 @@ export default function CustomTimePicker({ value, onChange, className = "", plac
                 <button 
                   type="button"
                   onClick={confirmSelection} 
-                  className="px-3 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg text-sm font-medium transition-all shadow-sm flex items-center justify-center gap-1.5"
+                  className="px-3 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium transition-all shadow-sm flex items-center justify-center gap-1.5"
                 >
                   <Check className="w-3.5 h-3.5" />
                   OK
