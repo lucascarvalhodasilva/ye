@@ -117,31 +117,54 @@ const generateMockData = (currentYear) => {
       isMultiDay: true,
       receiptFileName: 'trip-receipt-1009.pdf'
     },
-    // Recent trips (December/January)
+    // July trips (Phase 1.1)
     {
       id: 1010,
-      date: `${currentYear}-01-13`,
-      departureTime: '07:00',
-      returnTime: '18:30',
-      destination: 'Mannheim',
-      purpose: 'Vertriebsmeeting',
+      date: `${currentYear}-07-08`,
+      departureTime: '07:30',
+      returnTime: '18:00',
+      destination: 'Essen',
+      purpose: 'Technische Beratung',
       deductible: 14.0,
       isMultiDay: false
     },
     {
       id: 1011,
-      date: `${currentYear}-01-17`,
-      endDate: `${currentYear}-01-19`,
+      date: `${currentYear}-07-22`,
+      endDate: `${currentYear}-07-24`,
       departureTime: '06:00',
       returnTime: '20:00',
-      destination: 'Leipzig',
-      purpose: 'Kundenworkshop',
+      destination: 'Salzburg',
+      purpose: 'Sommerseminar',
+      deductible: 70.0,
+      isMultiDay: true,
+      receiptFileName: 'trip-receipt-1011.pdf'
+    },
+    // August trips (Phase 1.1)
+    {
+      id: 1012,
+      date: `${currentYear}-08-05`,
+      departureTime: '08:00',
+      returnTime: '17:30',
+      destination: 'Bonn',
+      purpose: 'Behördentermin',
+      deductible: 14.0,
+      isMultiDay: false
+    },
+    {
+      id: 1013,
+      date: `${currentYear}-08-19`,
+      endDate: `${currentYear}-08-21`,
+      departureTime: '06:30',
+      returnTime: '19:30',
+      destination: 'Graz',
+      purpose: 'Strategiemeeting',
       deductible: 70.0,
       isMultiDay: true
     },
     // September trips (Phase 1.1)
     {
-      id: 1012,
+      id: 1014,
       date: `${currentYear}-09-05`,
       departureTime: '07:00',
       returnTime: '19:00',
@@ -151,7 +174,7 @@ const generateMockData = (currentYear) => {
       isMultiDay: false
     },
     {
-      id: 1013,
+      id: 1015,
       date: `${currentYear}-09-18`,
       endDate: `${currentYear}-09-20`,
       departureTime: '06:30',
@@ -160,11 +183,11 @@ const generateMockData = (currentYear) => {
       purpose: 'Produktpräsentation',
       deductible: 70.0,
       isMultiDay: true,
-      receiptFileName: 'trip-receipt-1013.pdf'
+      receiptFileName: 'trip-receipt-1015.pdf'
     },
     // October trips (Phase 1.1)
     {
-      id: 1014,
+      id: 1016,
       date: `${currentYear}-10-12`,
       endDate: `${currentYear}-10-15`,
       departureTime: '06:00',
@@ -175,7 +198,7 @@ const generateMockData = (currentYear) => {
       isMultiDay: true
     },
     {
-      id: 1015,
+      id: 1017,
       date: `${currentYear}-10-25`,
       departureTime: '08:00',
       returnTime: '17:00',
@@ -183,11 +206,11 @@ const generateMockData = (currentYear) => {
       purpose: 'Technisches Audit',
       deductible: 14.0,
       isMultiDay: false,
-      receiptFileName: 'trip-receipt-1015.jpg'
+      receiptFileName: 'trip-receipt-1017.jpg'
     },
     // November trips (Phase 1.1)
     {
-      id: 1016,
+      id: 1018,
       date: `${currentYear}-11-08`,
       departureTime: '08:00',
       returnTime: '18:00',
@@ -197,7 +220,7 @@ const generateMockData = (currentYear) => {
       isMultiDay: false
     },
     {
-      id: 1017,
+      id: 1019,
       date: `${currentYear}-11-19`,
       endDate: `${currentYear}-11-21`,
       departureTime: '06:00',
@@ -209,7 +232,7 @@ const generateMockData = (currentYear) => {
     },
     // December trips (Phase 1.1)
     {
-      id: 1018,
+      id: 1020,
       date: `${currentYear}-12-05`,
       departureTime: '07:30',
       returnTime: '19:30',
@@ -219,7 +242,7 @@ const generateMockData = (currentYear) => {
       isMultiDay: false
     },
     {
-      id: 1019,
+      id: 1021,
       date: `${currentYear}-12-15`,
       endDate: `${currentYear}-12-18`,
       departureTime: '05:30',
@@ -228,7 +251,7 @@ const generateMockData = (currentYear) => {
       purpose: 'Jahresabschluss-Workshop',
       deductible: 98.0,
       isMultiDay: true,
-      receiptFileName: 'trip-receipt-1019.pdf'
+      receiptFileName: 'trip-receipt-1021.pdf'
     }
   ];
 
@@ -260,25 +283,32 @@ const generateMockData = (currentYear) => {
     { id: 2016, date: `${currentYear}-06-02`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1009, destination: 'Wien' },
     { id: 2017, date: `${currentYear}-06-06`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1009, destination: 'Wien (Rückfahrt)' },
     { id: 2019, date: `${currentYear}-06-10`, distance: 85, allowance: 17.00, vehicleType: 'motorcycle', destination: 'Karlsruhe - Kundentermin' },
-    // August - Motorcycle
+    // July - Car
+    { id: 2036, date: `${currentYear}-07-08`, distance: 65, allowance: 19.50, vehicleType: 'car', relatedTripId: 1010, destination: 'Essen' },
+    { id: 2037, date: `${currentYear}-07-22`, distance: 260, allowance: 78.00, vehicleType: 'car', relatedTripId: 1011, destination: 'Salzburg', receiptFileName: 'mileage-receipt-2037.pdf' },
+    { id: 2038, date: `${currentYear}-07-24`, distance: 260, allowance: 78.00, vehicleType: 'car', relatedTripId: 1011, destination: 'Salzburg (Rückfahrt)' },
+    // August - Car, Motorcycle
+    { id: 2039, date: `${currentYear}-08-05`, distance: 130, allowance: 39.00, vehicleType: 'car', relatedTripId: 1012, destination: 'Bonn' },
+    { id: 2040, date: `${currentYear}-08-19`, distance: 340, allowance: 102.00, vehicleType: 'car', relatedTripId: 1013, destination: 'Graz' },
+    { id: 2041, date: `${currentYear}-08-21`, distance: 340, allowance: 102.00, vehicleType: 'car', relatedTripId: 1013, destination: 'Graz (Rückfahrt)' },
     { id: 2020, date: `${currentYear}-08-15`, distance: 120, allowance: 24.00, vehicleType: 'motorcycle', destination: 'Freiburg - Workshop', receiptFileName: 'mileage-receipt-2020.pdf' },
     // September - Car, Bike
-    { id: 2024, date: `${currentYear}-09-05`, distance: 195, allowance: 58.50, vehicleType: 'car', relatedTripId: 1012, destination: 'Dresden' },
-    { id: 2025, date: `${currentYear}-09-18`, distance: 240, allowance: 72.00, vehicleType: 'car', relatedTripId: 1013, destination: 'Hannover' },
-    { id: 2026, date: `${currentYear}-09-20`, distance: 240, allowance: 72.00, vehicleType: 'car', relatedTripId: 1013, destination: 'Hannover (Rückfahrt)' },
+    { id: 2024, date: `${currentYear}-09-05`, distance: 195, allowance: 58.50, vehicleType: 'car', relatedTripId: 1014, destination: 'Dresden' },
+    { id: 2025, date: `${currentYear}-09-18`, distance: 240, allowance: 72.00, vehicleType: 'car', relatedTripId: 1015, destination: 'Hannover' },
+    { id: 2026, date: `${currentYear}-09-20`, distance: 240, allowance: 72.00, vehicleType: 'car', relatedTripId: 1015, destination: 'Hannover (Rückfahrt)' },
     { id: 2023, date: `${currentYear}-09-20`, distance: 15, allowance: 0.75, vehicleType: 'bike', destination: 'Nahversorgung - Büromaterial', receiptFileName: 'mileage-receipt-2023.jpg' },
     // October - Car
-    { id: 2027, date: `${currentYear}-10-12`, distance: 310, allowance: 93.00, vehicleType: 'car', relatedTripId: 1014, destination: 'Zürich' },
-    { id: 2028, date: `${currentYear}-10-15`, distance: 310, allowance: 93.00, vehicleType: 'car', relatedTripId: 1014, destination: 'Zürich (Rückfahrt)' },
-    { id: 2029, date: `${currentYear}-10-25`, distance: 75, allowance: 22.50, vehicleType: 'car', relatedTripId: 1015, destination: 'Karlsruhe' },
+    { id: 2027, date: `${currentYear}-10-12`, distance: 310, allowance: 93.00, vehicleType: 'car', relatedTripId: 1016, destination: 'Zürich' },
+    { id: 2028, date: `${currentYear}-10-15`, distance: 310, allowance: 93.00, vehicleType: 'car', relatedTripId: 1016, destination: 'Zürich (Rückfahrt)' },
+    { id: 2029, date: `${currentYear}-10-25`, distance: 75, allowance: 22.50, vehicleType: 'car', relatedTripId: 1017, destination: 'Karlsruhe' },
     // November - Car
-    { id: 2030, date: `${currentYear}-11-08`, distance: 130, allowance: 39.00, vehicleType: 'car', relatedTripId: 1016, destination: 'Bremen' },
-    { id: 2031, date: `${currentYear}-11-19`, distance: 105, allowance: 31.50, vehicleType: 'car', relatedTripId: 1017, destination: 'Dortmund' },
-    { id: 2032, date: `${currentYear}-11-21`, distance: 105, allowance: 31.50, vehicleType: 'car', relatedTripId: 1017, destination: 'Dortmund (Rückfahrt)' },
+    { id: 2030, date: `${currentYear}-11-08`, distance: 130, allowance: 39.00, vehicleType: 'car', relatedTripId: 1018, destination: 'Bremen' },
+    { id: 2031, date: `${currentYear}-11-19`, distance: 105, allowance: 31.50, vehicleType: 'car', relatedTripId: 1019, destination: 'Dortmund' },
+    { id: 2032, date: `${currentYear}-11-21`, distance: 105, allowance: 31.50, vehicleType: 'car', relatedTripId: 1019, destination: 'Dortmund (Rückfahrt)' },
     // December - Car
-    { id: 2033, date: `${currentYear}-12-05`, distance: 88, allowance: 26.40, vehicleType: 'car', relatedTripId: 1018, destination: 'Wiesbaden' },
-    { id: 2034, date: `${currentYear}-12-15`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1019, destination: 'Wien', receiptFileName: 'mileage-receipt-2034.pdf' },
-    { id: 2035, date: `${currentYear}-12-18`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1019, destination: 'Wien (Rückfahrt)' }
+    { id: 2033, date: `${currentYear}-12-05`, distance: 88, allowance: 26.40, vehicleType: 'car', relatedTripId: 1020, destination: 'Wiesbaden' },
+    { id: 2034, date: `${currentYear}-12-15`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1021, destination: 'Wien', receiptFileName: 'mileage-receipt-2034.pdf' },
+    { id: 2035, date: `${currentYear}-12-18`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1021, destination: 'Wien (Rückfahrt)' }
   ];
 
   const mockMonthlyExpenses = [
