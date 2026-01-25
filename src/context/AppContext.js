@@ -21,7 +21,7 @@ const generateMockData = (currentYear) => {
       destination: 'München',
       purpose: 'Kundentermin BMW',
       deductible: 70.0, // 2 full days + 2 travel days
-      isMultiDay: true
+      isMultiDay: true,
     },
     {
       id: 1002,
@@ -43,7 +43,7 @@ const generateMockData = (currentYear) => {
       destination: 'Hamburg',
       purpose: 'Workshop Team Nord',
       deductible: 70.0,
-      isMultiDay: true
+      isMultiDay: true,
     },
     {
       id: 1004,
@@ -65,7 +65,7 @@ const generateMockData = (currentYear) => {
       destination: 'Berlin',
       purpose: 'Projektstart Kunde XYZ',
       deductible: 126.0,
-      isMultiDay: true
+      isMultiDay: true,
     },
     // April trips
     {
@@ -98,7 +98,7 @@ const generateMockData = (currentYear) => {
       destination: 'Nürnberg',
       purpose: 'Audit Qualitätsmanagement',
       deductible: 14.0,
-      isMultiDay: false
+      isMultiDay: false,
     },
     // June trips
     {
@@ -110,56 +110,196 @@ const generateMockData = (currentYear) => {
       destination: 'Wien',
       purpose: 'Internationale Konferenz',
       deductible: 140.0,
-      isMultiDay: true
+      isMultiDay: true,
     },
-    // Recent trips (December/January)
+    // July trips (Phase 1.1)
     {
       id: 1010,
-      date: `${currentYear}-01-13`,
-      departureTime: '07:00',
-      returnTime: '18:30',
-      destination: 'Mannheim',
-      purpose: 'Vertriebsmeeting',
+      date: `${currentYear}-07-08`,
+      departureTime: '07:30',
+      returnTime: '18:00',
+      destination: 'Essen',
+      purpose: 'Technische Beratung',
       deductible: 14.0,
       isMultiDay: false
     },
     {
       id: 1011,
-      date: `${currentYear}-01-17`,
-      endDate: `${currentYear}-01-19`,
+      date: `${currentYear}-07-22`,
+      endDate: `${currentYear}-07-24`,
       departureTime: '06:00',
       returnTime: '20:00',
-      destination: 'Leipzig',
-      purpose: 'Kundenworkshop',
+      destination: 'Salzburg',
+      purpose: 'Sommerseminar',
+      deductible: 70.0,
+      isMultiDay: true,
+    },
+    // August trips (Phase 1.1)
+    {
+      id: 1012,
+      date: `${currentYear}-08-05`,
+      departureTime: '08:00',
+      returnTime: '17:30',
+      destination: 'Bonn',
+      purpose: 'Behördentermin',
+      deductible: 14.0,
+      isMultiDay: false
+    },
+    {
+      id: 1013,
+      date: `${currentYear}-08-19`,
+      endDate: `${currentYear}-08-21`,
+      departureTime: '06:30',
+      returnTime: '19:30',
+      destination: 'Graz',
+      purpose: 'Strategiemeeting',
       deductible: 70.0,
       isMultiDay: true
+    },
+    // September trips (Phase 1.1)
+    {
+      id: 1014,
+      date: `${currentYear}-09-05`,
+      departureTime: '07:00',
+      returnTime: '19:00',
+      destination: 'Dresden',
+      purpose: 'Herbstmesse Besuch',
+      deductible: 14.0,
+      isMultiDay: false
+    },
+    {
+      id: 1015,
+      date: `${currentYear}-09-18`,
+      endDate: `${currentYear}-09-20`,
+      departureTime: '06:30',
+      returnTime: '20:30',
+      destination: 'Hannover',
+      purpose: 'Produktpräsentation',
+      deductible: 70.0,
+      isMultiDay: true,
+    },
+    // October trips (Phase 1.1)
+    {
+      id: 1016,
+      date: `${currentYear}-10-12`,
+      endDate: `${currentYear}-10-15`,
+      departureTime: '06:00',
+      returnTime: '21:00',
+      destination: 'Zürich',
+      purpose: 'Internationale Konferenz',
+      deductible: 98.0,
+      isMultiDay: true
+    },
+    {
+      id: 1017,
+      date: `${currentYear}-10-25`,
+      departureTime: '08:00',
+      returnTime: '17:00',
+      destination: 'Karlsruhe',
+      purpose: 'Technisches Audit',
+      deductible: 14.0,
+      isMultiDay: false,
+    },
+    // November trips (Phase 1.1)
+    {
+      id: 1018,
+      date: `${currentYear}-11-08`,
+      departureTime: '08:00',
+      returnTime: '18:00',
+      destination: 'Bremen',
+      purpose: 'Kundenmeeting',
+      deductible: 14.0,
+      isMultiDay: false
+    },
+    {
+      id: 1019,
+      date: `${currentYear}-11-19`,
+      endDate: `${currentYear}-11-21`,
+      departureTime: '06:00',
+      returnTime: '20:00',
+      destination: 'Dortmund',
+      purpose: 'Workshop Digitalisierung',
+      deductible: 70.0,
+      isMultiDay: true
+    },
+    // December trips (Phase 1.1)
+    {
+      id: 1020,
+      date: `${currentYear}-12-05`,
+      departureTime: '07:30',
+      returnTime: '19:30',
+      destination: 'Wiesbaden',
+      purpose: 'Jahresplanung Meeting',
+      deductible: 14.0,
+      isMultiDay: false
+    },
+    {
+      id: 1021,
+      date: `${currentYear}-12-15`,
+      endDate: `${currentYear}-12-18`,
+      departureTime: '05:30',
+      returnTime: '22:00',
+      destination: 'Wien',
+      purpose: 'Jahresabschluss-Workshop',
+      deductible: 98.0,
+      isMultiDay: true,
     }
   ];
 
   const mockMileageEntries = [
-    // January
+    // January - Car
     { id: 2001, date: `${currentYear}-01-06`, distance: 285, allowance: 85.50, vehicleType: 'car', relatedTripId: 1001, destination: 'München' },
     { id: 2002, date: `${currentYear}-01-08`, distance: 285, allowance: 85.50, vehicleType: 'car', relatedTripId: 1001, destination: 'München (Rückfahrt)' },
     { id: 2003, date: `${currentYear}-01-15`, distance: 210, allowance: 63.00, vehicleType: 'car', relatedTripId: 1002, destination: 'Stuttgart' },
-    { id: 2004, date: `${currentYear}-01-13`, distance: 95, allowance: 28.50, vehicleType: 'car', relatedTripId: 1010, destination: 'Mannheim' },
-    { id: 2005, date: `${currentYear}-01-17`, distance: 320, allowance: 96.00, vehicleType: 'car', relatedTripId: 1011, destination: 'Leipzig' },
-    { id: 2006, date: `${currentYear}-01-19`, distance: 320, allowance: 96.00, vehicleType: 'car', relatedTripId: 1011, destination: 'Leipzig (Rückfahrt)' },
-    // February
+    { id: 2004, date: `${currentYear}-01-13`, distance: 95, allowance: 28.50, vehicleType: 'car', destination: 'Mannheim' },
+    { id: 2005, date: `${currentYear}-01-17`, distance: 320, allowance: 96.00, vehicleType: 'car', destination: 'Leipzig' },
+    { id: 2006, date: `${currentYear}-01-19`, distance: 320, allowance: 96.00, vehicleType: 'car', destination: 'Leipzig (Rückfahrt)' },
+    // February - Car
     { id: 2007, date: `${currentYear}-02-03`, distance: 470, allowance: 141.00, vehicleType: 'car', relatedTripId: 1003, destination: 'Hamburg' },
     { id: 2008, date: `${currentYear}-02-05`, distance: 470, allowance: 141.00, vehicleType: 'car', relatedTripId: 1003, destination: 'Hamburg (Rückfahrt)' },
     { id: 2009, date: `${currentYear}-02-20`, distance: 180, allowance: 54.00, vehicleType: 'car', relatedTripId: 1004, destination: 'Frankfurt' },
-    // March
+    // March - Car
     { id: 2010, date: `${currentYear}-03-10`, distance: 550, allowance: 165.00, vehicleType: 'car', relatedTripId: 1005, destination: 'Berlin' },
     { id: 2011, date: `${currentYear}-03-14`, distance: 550, allowance: 165.00, vehicleType: 'car', relatedTripId: 1005, destination: 'Berlin (Rückfahrt)' },
-    // April
+    // April - Car & Bike
     { id: 2012, date: `${currentYear}-04-07`, distance: 150, allowance: 45.00, vehicleType: 'car', relatedTripId: 1006, destination: 'Köln' },
     { id: 2013, date: `${currentYear}-04-22`, distance: 220, allowance: 66.00, vehicleType: 'car', relatedTripId: 1007, destination: 'Düsseldorf' },
     { id: 2014, date: `${currentYear}-04-24`, distance: 220, allowance: 66.00, vehicleType: 'car', relatedTripId: 1007, destination: 'Düsseldorf (Rückfahrt)' },
-    // May
+    { id: 2021, date: `${currentYear}-04-15`, distance: 12, allowance: 0.60, vehicleType: 'bike', destination: 'Lokaler Kunde - Stadtmitte' },
+    // May - Car, Motorcycle, Bike
     { id: 2015, date: `${currentYear}-05-12`, distance: 165, allowance: 49.50, vehicleType: 'car', relatedTripId: 1008, destination: 'Nürnberg' },
-    // June
+    { id: 2018, date: `${currentYear}-05-20`, distance: 45, allowance: 9.00, vehicleType: 'motorcycle', destination: 'Heidelberg - Kurzstrecke' },
+    { id: 2022, date: `${currentYear}-05-03`, distance: 8, allowance: 0.40, vehicleType: 'bike', destination: 'Stadtbüro - Meeting' },
+    // June - Car, Motorcycle
     { id: 2016, date: `${currentYear}-06-02`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1009, destination: 'Wien' },
-    { id: 2017, date: `${currentYear}-06-06`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1009, destination: 'Wien (Rückfahrt)' }
+    { id: 2017, date: `${currentYear}-06-06`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1009, destination: 'Wien (Rückfahrt)' },
+    { id: 2019, date: `${currentYear}-06-10`, distance: 85, allowance: 17.00, vehicleType: 'motorcycle', destination: 'Karlsruhe - Kundentermin' },
+    // July - Car
+    { id: 2036, date: `${currentYear}-07-08`, distance: 65, allowance: 19.50, vehicleType: 'car', relatedTripId: 1010, destination: 'Essen' },
+    { id: 2037, date: `${currentYear}-07-22`, distance: 260, allowance: 78.00, vehicleType: 'car', relatedTripId: 1011, destination: 'Salzburg' },
+    { id: 2038, date: `${currentYear}-07-24`, distance: 260, allowance: 78.00, vehicleType: 'car', relatedTripId: 1011, destination: 'Salzburg (Rückfahrt)' },
+    // August - Car, Motorcycle
+    { id: 2039, date: `${currentYear}-08-05`, distance: 130, allowance: 39.00, vehicleType: 'car', relatedTripId: 1012, destination: 'Bonn' },
+    { id: 2040, date: `${currentYear}-08-19`, distance: 340, allowance: 102.00, vehicleType: 'car', relatedTripId: 1013, destination: 'Graz' },
+    { id: 2041, date: `${currentYear}-08-21`, distance: 340, allowance: 102.00, vehicleType: 'car', relatedTripId: 1013, destination: 'Graz (Rückfahrt)' },
+    { id: 2020, date: `${currentYear}-08-15`, distance: 120, allowance: 24.00, vehicleType: 'motorcycle', destination: 'Freiburg - Workshop' },
+    // September - Car, Bike
+    { id: 2024, date: `${currentYear}-09-05`, distance: 195, allowance: 58.50, vehicleType: 'car', relatedTripId: 1014, destination: 'Dresden' },
+    { id: 2025, date: `${currentYear}-09-18`, distance: 240, allowance: 72.00, vehicleType: 'car', relatedTripId: 1015, destination: 'Hannover' },
+    { id: 2026, date: `${currentYear}-09-20`, distance: 240, allowance: 72.00, vehicleType: 'car', relatedTripId: 1015, destination: 'Hannover (Rückfahrt)' },
+    { id: 2023, date: `${currentYear}-09-20`, distance: 15, allowance: 0.75, vehicleType: 'bike', destination: 'Nahversorgung - Büromaterial' },
+    // October - Car
+    { id: 2027, date: `${currentYear}-10-12`, distance: 310, allowance: 93.00, vehicleType: 'car', relatedTripId: 1016, destination: 'Zürich' },
+    { id: 2028, date: `${currentYear}-10-15`, distance: 310, allowance: 93.00, vehicleType: 'car', relatedTripId: 1016, destination: 'Zürich (Rückfahrt)' },
+    { id: 2029, date: `${currentYear}-10-25`, distance: 75, allowance: 22.50, vehicleType: 'car', relatedTripId: 1017, destination: 'Karlsruhe' },
+    // November - Car
+    { id: 2030, date: `${currentYear}-11-08`, distance: 130, allowance: 39.00, vehicleType: 'car', relatedTripId: 1018, destination: 'Bremen' },
+    { id: 2031, date: `${currentYear}-11-19`, distance: 105, allowance: 31.50, vehicleType: 'car', relatedTripId: 1019, destination: 'Dortmund' },
+    { id: 2032, date: `${currentYear}-11-21`, distance: 105, allowance: 31.50, vehicleType: 'car', relatedTripId: 1019, destination: 'Dortmund (Rückfahrt)' },
+    // December - Car
+    { id: 2033, date: `${currentYear}-12-05`, distance: 88, allowance: 26.40, vehicleType: 'car', relatedTripId: 1020, destination: 'Wiesbaden' },
+    { id: 2034, date: `${currentYear}-12-15`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1021, destination: 'Wien' },
+    { id: 2035, date: `${currentYear}-12-18`, distance: 420, allowance: 126.00, vehicleType: 'car', relatedTripId: 1021, destination: 'Wien (Rückfahrt)' }
   ];
 
   const mockMonthlyExpenses = [
@@ -168,7 +308,13 @@ const generateMockData = (currentYear) => {
     { id: 3003, year: currentYear, month: 2, amount: 350.00 }, // March
     { id: 3004, year: currentYear, month: 3, amount: 150.00 }, // April
     { id: 3005, year: currentYear, month: 4, amount: 45.00 },  // May
-    { id: 3006, year: currentYear, month: 5, amount: 280.00 }  // June
+    { id: 3006, year: currentYear, month: 5, amount: 280.00 }, // June
+    { id: 3007, year: currentYear, month: 6, amount: 120.00 }, // July
+    { id: 3008, year: currentYear, month: 7, amount: 190.00 }, // August
+    { id: 3009, year: currentYear, month: 8, amount: 240.00 }, // September
+    { id: 3010, year: currentYear, month: 9, amount: 310.00 }, // October
+    { id: 3011, year: currentYear, month: 10, amount: 175.00 }, // November
+    { id: 3012, year: currentYear, month: 11, amount: 265.00 }  // December
   ];
 
   const mockEquipmentEntries = [
