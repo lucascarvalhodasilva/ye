@@ -293,7 +293,7 @@ export default function EquipmentList({
         {onAddEquipment && (
           <button 
             onClick={onAddEquipment}
-            className="h-12 px-5 rounded-xl bg-blue-500 hover:bg-blue-500/90 text-white transition-all shadow-sm flex items-center justify-center text-base font-medium"
+            className="h-12 px-5 rounded-xl bg-primary hover:bg-primary/90 !text-white transition-all shadow-sm flex items-center justify-center text-base font-medium"
           >
             Hinzufügen
           </button>

@@ -172,8 +172,8 @@ export default function ExpenseForm({
             (editingId && !hasChanges) || isSubmitting
               ? 'bg-muted text-muted-foreground cursor-not-allowed' 
               : editingId
-                ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                : 'bg-rose-500 hover:bg-rose-600 text-white'
+                ? 'bg-amber-500 hover:bg-amber-600 !text-white'
+                : 'bg-rose-500 hover:bg-rose-500/90 !text-white'
           }`}
         >
           {editingId ? (

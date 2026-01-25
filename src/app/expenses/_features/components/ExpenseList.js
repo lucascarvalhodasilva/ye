@@ -253,7 +253,7 @@ export default function ExpenseList({
         {onAddExpense && (
           <button 
             onClick={onAddExpense}
-            className="h-12 px-5 rounded-xl bg-rose-500 hover:bg-rose-500/90 text-white transition-all shadow-sm flex items-center justify-center text-base font-medium"
+            className="h-12 px-5 rounded-xl bg-rose-500 hover:bg-rose-500/90 !text-white transition-all shadow-sm flex items-center justify-center text-base font-medium"
           >
             Hinzufügen
           </button>
