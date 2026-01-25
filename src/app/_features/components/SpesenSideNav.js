@@ -126,7 +126,7 @@ export default function SpesenSideNav({ isOpen, onClose, year }) {
       >
         {/* Side Nav Panel */}
         <div 
-          className="fixed left-0 top-0 bottom-0 w-full md:w-[400px] bg-white dark:bg-gray-900 shadow-2xl overflow-y-auto z-50 animate-slideInLeft"
+          className="fixed left-0 top-0 bottom-0 w-[80%] min-w-[320px] max-w-[500px] bg-white dark:bg-gray-900 shadow-2xl overflow-y-auto z-50 animate-slideInLeft"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
