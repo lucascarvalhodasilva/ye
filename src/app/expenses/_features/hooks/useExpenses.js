@@ -12,6 +12,7 @@ export const useExpenses = () => {
     amount: ''
   });
   const [submitError, setSubmitError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Receipt State
   const [tempExpenseReceipt, setTempExpenseReceipt] = useState(null);
@@ -199,70 +200,81 @@ export const useExpenses = () => {
   const handleSubmit = async (e, onSuccess) => {
     e.preventDefault();
     setSubmitError(null);
+    setIsSubmitting(true);
 
-    if (!formData.description.trim()) {
-      setSubmitError("Bitte eine Beschreibung eingeben.");
-      return;
-    }
+    try {
+      if (!formData.description.trim()) {
+        setSubmitError("Bitte eine Beschreibung eingeben.");
+        setIsSubmitting(false);
+        return;
+      }
 
-    if (!formData.date) {
-      setSubmitError("Bitte ein Datum auswählen.");
-      return;
-    }
+      if (!formData.date) {
+        setSubmitError("Bitte ein Datum auswählen.");
+        setIsSubmitting(false);
+        return;
+      }
 
-    const amount = parseFloat(formData.amount);
-    if (!formData.amount || isNaN(amount) || amount <= 0) {
-      setSubmitError("Bitte einen gültigen Betrag (> 0) eingeben.");
-      return;
-    }
+      const amount = parseFloat(formData.amount);
+      if (!formData.amount || isNaN(amount) || amount <= 0) {
+        setSubmitError("Bitte einen gültigen Betrag (> 0) eingeben.");
+        setIsSubmitting(false);
+        return;
+      }
 
-    const newId = editingId || Date.now();
-    let receiptFileName = null;
+      const newId = editingId || Date.now();
+      let receiptFileName = null;
 
-    // If editing, check if we need to update receipt
-    if (editingId) {
-      // If path changed or removed
-      if (tempExpenseReceiptPath !== initialReceiptPath) {
-        if (tempExpenseReceiptPath) {
-           receiptFileName = await saveExpenseReceiptFinal(newId, formData.date);
+      // If editing, check if we need to update receipt
+      if (editingId) {
+        // If path changed or removed
+        if (tempExpenseReceiptPath !== initialReceiptPath) {
+          if (tempExpenseReceiptPath) {
+             receiptFileName = await saveExpenseReceiptFinal(newId, formData.date);
+          } else {
+             receiptFileName = null; // Receipt removed
+          }
         } else {
-           receiptFileName = null; // Receipt removed
+          // Keep existing receipt if not changed
+          const existingEntry = expenseEntries.find(e => e.id === editingId);
+          receiptFileName = existingEntry ? existingEntry.receiptFileName : null;
         }
+        
+        // Remove old entry first
+        deleteExpenseEntry(editingId);
       } else {
-        // Keep existing receipt if not changed
-        const existingEntry = expenseEntries.find(e => e.id === editingId);
-        receiptFileName = existingEntry ? existingEntry.receiptFileName : null;
+        // New Entry
+        if (tempExpenseReceiptPath) {
+          receiptFileName = await saveExpenseReceiptFinal(newId, formData.date);
+        }
       }
-      
-      // Remove old entry first
-      deleteExpenseEntry(editingId);
-    } else {
-      // New Entry
-      if (tempExpenseReceiptPath) {
-        receiptFileName = await saveExpenseReceiptFinal(newId, formData.date);
+
+      addExpenseEntry({
+        ...formData,
+        id: newId,
+        amount: amount,
+        receiptFileName
+      });
+
+      setFormData({
+        description: '',
+        date: '',
+        amount: ''
+      });
+      setTempExpenseReceipt(null);
+      setTempExpenseReceiptPath(null);
+      setEditingId(null);
+      setInitialEditData(null);
+      setInitialReceiptPath(null);
+      setIsSubmitting(false);
+
+      if (onSuccess) {
+        onSuccess(newId);
       }
-    }
-
-    addExpenseEntry({
-      ...formData,
-      id: newId,
-      amount: amount,
-      receiptFileName
-    });
-
-    setFormData({
-      description: '',
-      date: '',
-      amount: ''
-    });
-    setTempExpenseReceipt(null);
-    setTempExpenseReceiptPath(null);
-    setEditingId(null);
-    setInitialEditData(null);
-    setInitialReceiptPath(null);
-
-    if (onSuccess) {
-      onSuccess(newId);
+    } catch (error) {
+      console.error('Error submitting expense:', error);
+      setSubmitError('Ein Fehler ist aufgetreten beim Speichern.');
+      setIsSubmitting(false);
     }
   };
 
@@ -370,6 +382,7 @@ export const useExpenses = () => {
     isFullScreen,
     setIsFullScreen,
     submitError,
+    isSubmitting,
     // Receipt props
     tempExpenseReceipt,
     tempExpenseReceiptType,

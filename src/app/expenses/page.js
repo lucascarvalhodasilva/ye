@@ -20,6 +20,7 @@ export default function ExpensesPage() {
     isFullScreen,
     setIsFullScreen,
     submitError,
+    isSubmitting,
     tempExpenseReceipt,
     tempExpenseReceiptType,
     showExpenseCameraOptions,
@@ -110,6 +111,7 @@ export default function ExpensesPage() {
                 setFormData={setFormData}
                 handleSubmit={handleFormSubmit}
                 submitError={submitError}
+                isSubmitting={isSubmitting}
                 tempExpenseReceipt={tempExpenseReceipt}
                 tempExpenseReceiptType={tempExpenseReceiptType}
                 takeExpensePicture={takeExpensePicture}

@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import NumberInput from '@/components/shared/NumberInput';
 import CustomDatePicker from '@/components/shared/CustomDatePicker';
 import ReceiptUpload from '@/components/shared/ReceiptUpload';
+import { LoadingButton } from '@/components/shared/skeletons';
 
 export default function ExpenseForm({ 
   formData, 
   setFormData, 
   handleSubmit, 
   submitError,
+  isSubmitting,
   tempExpenseReceipt,
   tempExpenseReceiptType = 'image',
   takeExpensePicture,
@@ -161,12 +163,13 @@ export default function ExpenseForm({
 
       {/* Footer with Submit Button */}
       <div className={`border-t border-border/50 bg-muted/30 p-4 shrink-0 ${submitError ? 'border-t-0 pt-2' : ''}`}>
-        <button 
+        <LoadingButton 
           type="submit" 
           form="expense-form"
-          disabled={editingId && !hasChanges}
+          disabled={(editingId && !hasChanges) || isSubmitting}
+          isLoading={isSubmitting}
           className={`w-full px-6 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 text-sm shadow-sm ${
-            editingId && !hasChanges 
+            (editingId && !hasChanges) || isSubmitting
               ? 'bg-muted text-muted-foreground cursor-not-allowed' 
               : editingId
                 ? 'bg-amber-500 hover:bg-amber-600 text-white'
@@ -188,7 +191,7 @@ export default function ExpenseForm({
               Hinzufügen
             </>
           )}
-        </button>
+        </LoadingButton>
       </div>
     </div>
   );
