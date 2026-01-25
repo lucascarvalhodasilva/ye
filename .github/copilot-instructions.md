@@ -128,9 +128,11 @@ src/
 ## Testing
 
 Currently, there is no formal testing infrastructure. When adding tests:
-- Use a testing framework compatible with Next.js App Router
+- **Unit/Integration**: Consider Jest with React Testing Library for component and hook testing
+- **E2E**: Consider Playwright or Cypress for end-to-end testing of critical user flows
+- Ensure compatibility with Next.js 16+ App Router
 - Test components, hooks, and utilities
-- Consider end-to-end tests for critical user flows
+- Include mobile-specific tests for Capacitor features
 
 ## Mobile Deployment
 
