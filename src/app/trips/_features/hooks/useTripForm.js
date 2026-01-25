@@ -429,22 +429,26 @@ export const useTripForm = () => {
     }
 
     // Reset form
-    setFormData({ 
-      ...formData, 
+    setFormData({
       destination: '',
-      startTime: '', 
-      endTime: '', 
-      endDate: '', 
+      date: '',
+      endDate: '',
+      startTime: '',
+      endTime: '',
       employerExpenses: 0,
-      commute: {
-        ...formData.commute,
-        public_transport: { ...formData.commute.public_transport, cost: '' }
+      commute: defaultCommute || {
+        car: { active: true, distance: 0 },
+        motorcycle: { active: false, distance: 0 },
+        bike: { active: false, distance: 0 },
+        public_transport: { active: false, cost: '' }
       }
     });
     
     setTempPublicTransportReceipt(null);
     setTempPublicTransportReceiptPath(null);
     setEditingId(null);
+    setInitialEditData(null);
+    setInitialReceiptPath(null);
     setIsSubmitting(false);
 
     if (onSuccess) onSuccess(tripId);
@@ -537,11 +541,12 @@ export const useTripForm = () => {
     setTempPublicTransportReceiptPath(null);
     
     // Reset to defaults for new entry
-    setFormData(prev => ({
-      ...prev,
+    setFormData({
+      destination: '',
+      date: '',
+      endDate: '',
       startTime: '',
       endTime: '',
-      endDate: '',
       employerExpenses: 0,
       commute: defaultCommute || {
         car: { active: true, distance: 0 },
@@ -549,7 +554,7 @@ export const useTripForm = () => {
         bike: { active: false, distance: 0 },
         public_transport: { active: false, cost: '' }
       }
-    }));
+    });
   };
 
   return { 
