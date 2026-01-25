@@ -47,9 +47,7 @@ export default function ExpensesPage() {
 
   const handleModalClose = () => {
     setShowExpenseModal(false);
-    if (editingId) {
-      cancelEdit();
-    }
+    cancelEdit(); // Always reset form when closing modal
   };
 
   const handleEdit = (entry) => {

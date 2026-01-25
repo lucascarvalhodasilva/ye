@@ -38,9 +38,7 @@ export default function EquipmentPage() {
 
   const handleModalClose = () => {
     setShowEquipmentModal(false);
-    if (editingId) {
-      cancelEdit();
-    }
+    cancelEdit(); // Always reset form when closing modal
   };
 
   // Prevent body scroll when modal is open

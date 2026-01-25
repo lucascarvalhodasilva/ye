@@ -44,9 +44,7 @@ export default function TripsPage() {
   // Close modal and cancel edit
   const handleModalClose = () => {
     setShowTripModal(false);
-    if (editingId) {
-      cancelEdit();
-    }
+    cancelEdit(); // Always reset form when closing modal
   };
 
   // Prevent body scroll when modal is open
