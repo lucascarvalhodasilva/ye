@@ -10,7 +10,7 @@
  * @param {string} fileName - The filename to analyze
  * @returns {string} - The lowercase file extension without the dot, or empty string if no extension
  */
-const getFileExtension = (fileName) => {
+export const getFileExtension = (fileName) => {
   if (!fileName || typeof fileName !== 'string') return '';
   
   const lastDotIndex = fileName.lastIndexOf('.');
