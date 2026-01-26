@@ -111,7 +111,7 @@ export default function SwipeableListItem({
       window.removeEventListener('mouseup', onPointerUp);
       window.removeEventListener('touchend', onPointerUp);
     };
-  }, [hasReceipt]);
+  }, []);
 
   return (
     <div 
@@ -182,7 +182,7 @@ export default function SwipeableListItem({
       {/* Backdrop (click to close) */}
       {swipeDirection && (
         <div 
-          className="fixed inset-0 z-[-1]" 
+          className="fixed inset-0 z-0" 
           onClick={closeSwipe}
         />
       )}
