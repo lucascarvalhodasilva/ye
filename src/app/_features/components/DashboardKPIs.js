@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import SpesenSideNav from './SpesenSideNav';
+import SpesenSidebar from './SpesenSidebar';
 import TaxDeductibleChart from './TaxDeductibleChart';
 import { useUIContext } from '@/context/UIContext';
 
@@ -100,18 +100,18 @@ export default function DashboardKPIs({
   totalExpenses, 
   netTotal 
 }) {
-  const [isSpesenSideNavOpen, setIsSpesenSideNavOpen] = useState(false);
+  const [isSpesenSidebarOpen, setIsSpesenSidebarOpen] = useState(false);
   const [isChartExpanded, setIsChartExpanded] = useState(false);
   const { pushModal, removeModal } = useUIContext();
 
-  // Register/unregister spesen sidenav with back button handler
+  // Register/unregister spesen sidebar with back button handler
   useEffect(() => {
-    if (isSpesenSideNavOpen) {
-      pushModal('spesen-sidenav', () => setIsSpesenSideNavOpen(false));
+    if (isSpesenSidebarOpen) {
+      pushModal('spesen-sidebar', () => setIsSpesenSidebarOpen(false));
     } else {
-      removeModal('spesen-sidenav');
+      removeModal('spesen-sidebar');
     }
-  }, [isSpesenSideNavOpen, pushModal, removeModal]);
+  }, [isSpesenSidebarOpen, pushModal, removeModal]);
 
   return (
     <div className="space-y-7">
@@ -199,7 +199,7 @@ export default function DashboardKPIs({
           label="AG Spesen"
           value={`${totalEmployerReimbursement.toFixed(2)} €`}
           variant="clickable"
-          onClick={() => setIsSpesenSideNavOpen(true)}
+          onClick={() => setIsSpesenSidebarOpen(true)}
         />
       </div>
 
@@ -240,10 +240,10 @@ export default function DashboardKPIs({
         </div>
       </div>
 
-      {/* Spesen Side Navigation */}
-      <SpesenSideNav
-        isOpen={isSpesenSideNavOpen}
-        onClose={() => setIsSpesenSideNavOpen(false)}
+      {/* Spesen Sidebar */}
+      <SpesenSidebar
+        isOpen={isSpesenSidebarOpen}
+        onClose={() => setIsSpesenSidebarOpen(false)}
         year={selectedYear}
       />
     </div>

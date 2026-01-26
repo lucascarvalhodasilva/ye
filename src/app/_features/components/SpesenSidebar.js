@@ -3,16 +3,16 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAppContext } from '@/context/AppContext';
 
 /**
- * Side navigation panel for managing monthly employer reimbursements (Spesen)
+ * Sidebar panel for managing monthly employer reimbursements (Spesen)
  * Slides in from the left with a backdrop
  * 
  * @param {Object} props
- * @param {boolean} props.isOpen - Whether the side nav is open
- * @param {Function} props.onClose - Callback to close the side nav
+ * @param {boolean} props.isOpen - Whether the sidebar is open
+ * @param {Function} props.onClose - Callback to close the sidebar
  * @param {number} props.year - Selected year
  * @returns {JSX.Element}
  */
-export default function SpesenSideNav({ isOpen, onClose, year }) {
+export default function SpesenSidebar({ isOpen, onClose, year }) {
   const { monthlyEmployerExpenses, addMonthlyEmployerExpense, updateMonthlyEmployerExpense, deleteMonthlyEmployerExpense, getSpesenForYear } = useAppContext();
   const [quickAddMonth, setQuickAddMonth] = useState(null);
   const [quickAddAmount, setQuickAddAmount] = useState('');
@@ -212,7 +212,7 @@ export default function SpesenSideNav({ isOpen, onClose, year }) {
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity animate-in fade-in duration-200"
         onClick={handleBackdropClick}
       >
-        {/* Side Nav Panel */}
+        {/* Sidebar Panel */}
         <div 
           className="fixed left-0 top-0 bottom-0 w-[85%] min-w-[320px] max-w-[480px] bg-card/95 backdrop-blur-md shadow-2xl overflow-hidden z-[70] animate-slideInLeft flex flex-col"
           onClick={(e) => e.stopPropagation()}
