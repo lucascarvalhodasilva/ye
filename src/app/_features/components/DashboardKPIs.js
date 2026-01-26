@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SpesenSideNav from './SpesenSideNav';
 import TaxDeductibleChart from './TaxDeductibleChart';
+import { useUIContext } from '@/context/UIContext';
 
 /**
  * @typedef {'default' | 'negative' | 'clickable'} KPIVariant
@@ -101,6 +102,16 @@ export default function DashboardKPIs({
 }) {
   const [isSpesenSideNavOpen, setIsSpesenSideNavOpen] = useState(false);
   const [isChartExpanded, setIsChartExpanded] = useState(false);
+  const { pushModal, removeModal } = useUIContext();
+
+  // Register/unregister spesen sidenav with back button handler
+  useEffect(() => {
+    if (isSpesenSideNavOpen) {
+      pushModal('spesen-sidenav', () => setIsSpesenSideNavOpen(false));
+    } else {
+      removeModal('spesen-sidenav');
+    }
+  }, [isSpesenSideNavOpen, pushModal, removeModal]);
 
   return (
     <div className="space-y-7">
