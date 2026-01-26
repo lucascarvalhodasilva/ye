@@ -76,7 +76,7 @@ export default function TripsPage() {
   useEffect(() => {
     if (viewingReceipt) {
       const modalId = `receipt-viewer-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, () => setViewingReceipt(null));
       return () => removeModal(modalId);
     }
   }, [viewingReceipt, pushModal, removeModal]);
@@ -85,7 +85,7 @@ export default function TripsPage() {
   useEffect(() => {
     if (showTripModal) {
       const modalId = `trip-form-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
   }, [showTripModal, pushModal, removeModal]);

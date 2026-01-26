@@ -15,16 +15,24 @@ export function UIProvider({ children }) {
     setSidebarOpen(false);
   }, []);
 
-  const pushModal = useCallback((modalId) => {
-    setModalStack(prev => [...prev, modalId]);
+  const pushModal = useCallback((modalId, closeHandler) => {
+    setModalStack(prev => [...prev, { id: modalId, close: closeHandler }]);
   }, []);
 
   const popModal = useCallback(() => {
-    setModalStack(prev => prev.slice(0, -1));
+    setModalStack(prev => {
+      if (prev.length === 0) return prev;
+      const topModal = prev[prev.length - 1];
+      // Call the close handler for the top modal
+      if (topModal.close) {
+        topModal.close();
+      }
+      return prev.slice(0, -1);
+    });
   }, []);
 
   const removeModal = useCallback((modalId) => {
-    setModalStack(prev => prev.filter(id => id !== modalId));
+    setModalStack(prev => prev.filter(item => item.id !== modalId));
   }, []);
 
   const hasOpenModals = modalStack.length > 0;

@@ -73,7 +73,7 @@ export default function ExpensesPage() {
   useEffect(() => {
     if (viewingReceipt) {
       const modalId = `receipt-viewer-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, () => setViewingReceipt(null));
       return () => removeModal(modalId);
     }
   }, [viewingReceipt, pushModal, removeModal]);
@@ -81,7 +81,7 @@ export default function ExpensesPage() {
   useEffect(() => {
     if (showExpenseModal) {
       const modalId = `expense-form-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
   }, [showExpenseModal, pushModal, removeModal]);
@@ -89,7 +89,7 @@ export default function ExpensesPage() {
   useEffect(() => {
     if (isFullScreen) {
       const modalId = `fullscreen-table-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, () => setIsFullScreen(false));
       return () => removeModal(modalId);
     }
   }, [isFullScreen, pushModal, removeModal]);

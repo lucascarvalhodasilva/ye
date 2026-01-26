@@ -8,10 +8,10 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, m
   useEffect(() => {
     if (isOpen) {
       const modalId = `confirmation-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, onClose);
       return () => removeModal(modalId);
     }
-  }, [isOpen, pushModal, removeModal]);
+  }, [isOpen, onClose, pushModal, removeModal]);
 
   if (!isOpen) return null;
 

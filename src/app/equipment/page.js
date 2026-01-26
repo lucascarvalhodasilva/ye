@@ -72,7 +72,7 @@ export default function EquipmentPage() {
   useEffect(() => {
     if (viewingReceipt) {
       const modalId = `receipt-viewer-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, () => setViewingReceipt(null));
       return () => removeModal(modalId);
     }
   }, [viewingReceipt, pushModal, removeModal]);
@@ -80,7 +80,7 @@ export default function EquipmentPage() {
   useEffect(() => {
     if (showEquipmentModal) {
       const modalId = `equipment-form-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
   }, [showEquipmentModal, pushModal, removeModal]);
@@ -88,7 +88,7 @@ export default function EquipmentPage() {
   useEffect(() => {
     if (isFullScreen) {
       const modalId = `fullscreen-table-${Date.now()}`;
-      pushModal(modalId);
+      pushModal(modalId, () => setIsFullScreen(false));
       return () => removeModal(modalId);
     }
   }, [isFullScreen, pushModal, removeModal]);
