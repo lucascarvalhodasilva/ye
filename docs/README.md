@@ -1,74 +1,84 @@
-# 📚 Documentation Structure
+# Fleet-Steuer Documentation
 
-This folder contains comprehensive documentation for the Tax Deduction Tracker application.
+Comprehensive documentation for the Fleet-Steuer tax deduction tracking application.
 
-## Folder Structure
+## 📂 Directory Structure
 
-```
-docs/
-├── README.md                          # This file
-├── reviews/                           # Code review documents
-│   ├── dashboard-module-review.md     # Dashboard review
-│   ├── trips-module-review.md         # Trips module review
-│   ├── expenses-module-review.md      # (To be created)
-│   ├── equipment-module-review.md     # (To be created)
-│   └── settings-module-review.md      # (To be created)
-├── architecture/                      # (To be created)
-│   ├── system-overview.md
-│   ├── data-flow.md
-│   └── component-hierarchy.md
-├── api/                               # (To be created)
-│   ├── context-api.md
-│   ├── hooks.md
-│   └── utils.md
-└── guides/                            # (To be created)
-    ├── setup.md
-    ├── deployment.md
-    └── contributing.md
-```
+### `/diagrams` - Visual Documentation
+Flow diagrams, architecture diagrams, and visual guides for features and implementations.
 
-## Review Documents
+- `ANDROID_BACK_BUTTON_FLOW_DIAGRAM.md` - Android back button navigation flow
+- `SWIPE_GESTURES_VISUAL_GUIDE.md` - Bi-directional swipe gesture patterns
 
-### Completed Reviews
-- ✅ **Dashboard Module** - Comprehensive review of KPI cards and yearly overview
-- ✅ **Trips Module** - Detailed analysis of trip tracking and German tax calculations
+### `/implementations` - Implementation Details
+Detailed implementation documentation for features and bug fixes.
 
-### Pending Reviews
-- ⏳ **Expenses Module** - Private expense tracking
-- ⏳ **Equipment Module** - Work equipment with GWG rules
-- ⏳ **Settings Module** - App configuration and backups
+- `ANDROID_BACK_BUTTON_SCHEDULE_CARD.md` - Back button integration for schedule card
+- `CORRECTION_RECEIPT_PREVIEW.md` - Receipt preview bug fix
+- `EQUIPMENT_SWIPE_ACTIONS_IMPLEMENTATION.md` - Equipment swipe actions
+- `IMPLEMENTATION_COMPLETE.md` - Overall implementation completion summary
+- `IMPLEMENTATION_SUMMARY_BACK_BUTTON.md` - Android back button implementation
+- `SPESEN_IMPLEMENTATION_SUMMARY.md` - Monthly expense tracking implementation
+- `SWIPE_GESTURES_IMPLEMENTATION.md` - Bi-directional swipe gestures
 
-## Review Standards
+### `/reviews` - Module Reviews
+Comprehensive reviews of each module's implementation, functionality, and code quality.
 
-Each review document follows this structure:
+- `dashboard-module-review.md` - Dashboard KPI module (Grade: A, 92/100)
+- `equipment-module-review.md` - Equipment/Arbeitsmittel module (Grade: A+, 96/100)
+- `expenses-module-review.md` - Expenses tracking module (Grade: A, 94/100)
+- `file-size-validation-implementation.md` - File upload validation
+- `loading-button-replacement.md` - Loading state improvements
+- `loading-states-implementation.md` - Loading states across modules
+- `settings-module-review.md` - Settings module (Grade: A+, 98/100)
+- `tax-settings-validation-implementation.md` - Tax settings validation
+- `trips-module-review.md` - Trips module (Grade: A+, 98/100)
 
-1. **Overview** - Summary and status
-2. **Architecture** - File structure and organization
-3. **Features** - Implemented functionality
-4. **Code Quality** - Assessment and patterns
-5. **GitHub Issue Coverage** - Acceptance criteria tracking
-6. **Grade** - Overall assessment with breakdown
-7. **Improvements** - Suggestions for enhancement
-8. **Summary** - Final recommendations
+### `/summaries` - Quick Summaries
+High-level summaries and status updates for major features and implementations.
 
-## Grading Scale
+- `EQUIPMENT_REVIEW_SUMMARY.md` - Equipment module review summary
+- `EXPENSES_REVIEW_SUMMARY.md` - Expenses module review summary
+- `FILE_SIZE_VALIDATION_SUMMARY.md` - File validation implementation summary
+- `LOADING_STATES_SUMMARY.md` - Loading states implementation summary
 
-- **A+ (95-100)** - Exceptional, production-ready
-- **A (90-94)** - Excellent, minor improvements possible
-- **B (80-89)** - Good, some enhancements needed
-- **C (70-79)** - Adequate, significant improvements needed
-- **D (60-69)** - Below expectations, requires refactoring
+## 🎯 Project Overview
 
-## Contributing
+**Fleet-Steuer** is a German tax deduction tracker designed for vehicle couriers (Kurier-Fahrer). Built with Next.js and Capacitor for cross-platform deployment (Web, iOS, Android).
 
-When adding new reviews:
-1. Use the existing template structure
-2. Include code examples
-3. Reference GitHub issues
-4. Provide actionable recommendations
-5. Update this README with new entries
+### Core Modules
+- **Dashboard** - KPI cards with tax deduction summaries
+- **Trips** - Mileage tracking and trip management
+- **Expenses** - Daily expense tracking (€14/€28 allowances)
+- **Equipment** - Depreciation schedule management (GWG €952 limit)
+- **Settings** - Tax year configuration and preferences
 
-## License
+### Average Module Grade: **A+ (95.2/100)**
 
-Part of the Tax Deduction Tracker project documentation.
+## 📖 Additional Resources
 
+- **Project README**: See root `/README.md`
+- **GitHub Issues**: [lucascarvalhodasilva/ye](https://github.com/lucascarvalhodasilva/ye)
+- **Copilot Instructions**: `.github/copilot-instructions.md`
+
+## 🔗 Quick Links
+
+### Recent Implementations
+- [Android Back Button Handler](implementations/IMPLEMENTATION_SUMMARY_BACK_BUTTON.md)
+- [Bi-directional Swipe Gestures](implementations/SWIPE_GESTURES_IMPLEMENTATION.md)
+- [Monthly Expense Tracking](implementations/SPESEN_IMPLEMENTATION_SUMMARY.md)
+
+### Visual Guides
+- [Swipe Gestures Flow](diagrams/SWIPE_GESTURES_VISUAL_GUIDE.md)
+- [Back Button Navigation](diagrams/ANDROID_BACK_BUTTON_FLOW_DIAGRAM.md)
+
+### Module Reviews
+- [Dashboard Review](reviews/dashboard-module-review.md) - Grade: A (92/100)
+- [Trips Review](reviews/trips-module-review.md) - Grade: A+ (98/100)
+- [Expenses Review](reviews/expenses-module-review.md) - Grade: A (94/100)
+- [Equipment Review](reviews/equipment-module-review.md) - Grade: A+ (96/100)
+- [Settings Review](reviews/settings-module-review.md) - Grade: A+ (98/100)
+
+---
+
+**Last Updated**: January 28, 2026
