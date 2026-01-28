@@ -8,7 +8,6 @@ import PDFViewer from '@/components/shared/PDFViewerDynamic';
 import { useUIContext } from '@/context/UIContext';
 
 export default function TripsPage() {
-  const [isFullScreen, setIsFullScreen] = useState(false);
   const [highlightId, setHighlightId] = useState(null);
   const [showTripModal, setShowTripModal] = useState(false);
   const currentMonth = new Date().getMonth();
