@@ -48,13 +48,19 @@ export default function EquipmentPage() {
 
   // Auto-close schedule card when opening form or receipt preview
   useEffect(() => {
+    let timeoutId;
     if (showEquipmentModal || viewingReceipt) {
       if (scheduleOpen) {
         setScheduleOpen(false);
-        setTimeout(() => setSelectedEquipment(null), 300);
+        timeoutId = setTimeout(() => setSelectedEquipment(null), 300);
       }
     }
-  }, [showEquipmentModal, viewingReceipt, scheduleOpen]);
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [showEquipmentModal, viewingReceipt]); // Only respond to modal/receipt state changes
 
   // Prevent body scroll when modal is open
   useEffect(() => {
