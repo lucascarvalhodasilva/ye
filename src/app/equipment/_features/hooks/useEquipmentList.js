@@ -5,7 +5,6 @@ import { getMimeType, getFileType, base64ToUint8Array } from '@/utils/fileHelper
 
 export const useEquipmentList = () => {
   const { equipmentEntries, deleteEquipmentEntry, selectedYear, taxRates } = useAppContext();
-  const [isFullScreen, setIsFullScreen] = useState(false);
   const [viewingReceipt, setViewingReceipt] = useState(null);
 
   const loadReceipt = async (fileName) => {
@@ -203,8 +202,6 @@ export const useEquipmentList = () => {
     filteredEquipmentEntries,
     deleteEquipmentEntry,
     selectedYear,
-    isFullScreen,
-    setIsFullScreen,
     viewingReceipt,
     setViewingReceipt,
     handleViewReceipt,

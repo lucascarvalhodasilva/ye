@@ -18,7 +18,6 @@ export default function EquipmentPage() {
   // Refs to store stable modal IDs
   const receiptModalIdRef = useRef(null);
   const equipmentModalIdRef = useRef(null);
-  const fullscreenModalIdRef = useRef(null);
 
   const {
     formData,
@@ -137,20 +136,6 @@ export default function EquipmentPage() {
     }
   }, [showEquipmentModal, handleModalClose, pushModal, removeModal]);
 
-  useEffect(() => {
-    if (isFullScreen) {
-      const modalId = `fullscreen-table-${Date.now()}`;
-      fullscreenModalIdRef.current = modalId;
-      pushModal(modalId, () => setIsFullScreen(false));
-      return () => {
-        if (fullscreenModalIdRef.current) {
-          removeModal(fullscreenModalIdRef.current);
-          fullscreenModalIdRef.current = null;
-        }
-      };
-    }
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
-
   const totalDeductible = filteredEquipmentEntries.reduce((sum, entry) => sum + (entry.deductibleAmount || 0), 0);
 
   return (
@@ -165,7 +150,6 @@ export default function EquipmentPage() {
             filteredEquipmentEntries={filteredEquipmentEntries}
             deleteEquipmentEntry={deleteEquipmentEntry}
             selectedYear={selectedYear}
-            setIsFullScreen={setIsFullScreen}
             handleViewReceipt={(fileName) => closeFloatingCardThen(() => handleViewReceipt(fileName))}
             highlightId={highlightId}
             onEdit={async (entry) => {
@@ -180,7 +164,6 @@ export default function EquipmentPage() {
             setScheduleOpen={setScheduleOpen}
             selectedEquipment={selectedEquipment}
             setSelectedEquipment={setSelectedEquipment}
-            isFullScreen={isFullScreen}
           />
         </div>
 

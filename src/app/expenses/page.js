@@ -14,7 +14,6 @@ export default function ExpensesPage() {
   // Refs to store stable modal IDs
   const receiptModalIdRef = useRef(null);
   const expenseModalIdRef = useRef(null);
-  const fullscreenModalIdRef = useRef(null);
   
   const {
     formData,
@@ -108,20 +107,6 @@ export default function ExpensesPage() {
     }
   }, [showExpenseModal, handleModalClose, pushModal, removeModal]);
 
-  useEffect(() => {
-    if (isFullScreen) {
-      const modalId = `fullscreen-table-${Date.now()}`;
-      fullscreenModalIdRef.current = modalId;
-      pushModal(modalId, () => setIsFullScreen(false));
-      return () => {
-        if (fullscreenModalIdRef.current) {
-          removeModal(fullscreenModalIdRef.current);
-          fullscreenModalIdRef.current = null;
-        }
-      };
-    }
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
-
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
   const totalAmount = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
@@ -137,7 +122,6 @@ export default function ExpensesPage() {
             filteredEntries={filteredEntries}
             deleteExpenseEntry={deleteExpenseEntry}
             selectedYear={selectedYear}
-            setIsFullScreen={setIsFullScreen}
             monthlyExpenses={monthlyExpenses}
             monthNames={monthNames}
             highlightId={highlightId}
@@ -146,7 +130,6 @@ export default function ExpensesPage() {
             setViewingReceipt={setViewingReceipt}
             onEdit={handleEdit}
             onAddExpense={() => setShowExpenseModal(true)}
-            isFullScreen={isFullScreen}
           />
         </div>
 

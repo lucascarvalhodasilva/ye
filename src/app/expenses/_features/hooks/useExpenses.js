@@ -7,7 +7,6 @@ import { getMimeType, getFileType, base64ToUint8Array } from '@/utils/fileHelper
 
 export const useExpenses = () => {
   const { expenseEntries, addExpenseEntry, deleteExpenseEntry, selectedYear } = useAppContext();
-  const [isFullScreen, setIsFullScreen] = useState(false);
   const [formData, setFormData] = useState({
     description: '',
     date: '',
@@ -412,8 +411,6 @@ export const useExpenses = () => {
     monthlyExpenses,
     deleteExpenseEntry,
     selectedYear,
-    isFullScreen,
-    setIsFullScreen,
     submitError,
     isSubmitting,
     // Receipt props
