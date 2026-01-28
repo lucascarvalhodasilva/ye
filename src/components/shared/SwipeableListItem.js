@@ -148,7 +148,7 @@ export default function SwipeableListItem({
           {hasReceipt && (
             <button
               onClick={(e) => handleActionClick('receipt', e)}
-              className="w-10 h-10 bg-primary/80 hover:bg-primary/90 text-white transition-all flex items-center justify-center active:scale-95 rounded-xl"
+              className="w-10 h-10 bg-yellow-500/80 hover:bg-yellow-500/90 text-white transition-all flex items-center justify-center active:scale-95 rounded-xl"
               aria-label="Beleg ansehen"
             >
               <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
