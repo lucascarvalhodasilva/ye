@@ -63,6 +63,11 @@ export function UIProvider({ children }) {
     setCloseScheduleCardHandler(null);
   }, [closeScheduleCardHandler]);
 
+  const clearScheduleCardState = useCallback(() => {
+    setScheduleCardOpen(false);
+    setCloseScheduleCardHandler(null);
+  }, []);
+
   const hasOpenModals = modalStack.length > 0;
 
   return (
@@ -78,7 +83,8 @@ export function UIProvider({ children }) {
       hasOpenModals,
       scheduleCardOpen,
       openScheduleCard,
-      closeScheduleCard
+      closeScheduleCard,
+      clearScheduleCardState
     }}>
       {children}
     </UIContext.Provider>

@@ -23,13 +23,15 @@ export default function EquipmentList({
   const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, entry: null });
   const [collapsedMonths, setCollapsedMonths] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const { openScheduleCard, closeScheduleCard } = useUIContext();
+  const { openScheduleCard, clearScheduleCardState } = useUIContext();
 
   // Handle schedule card close - integrates with UIContext for back button support
   const handleCloseScheduleCard = useCallback(() => {
     setScheduleOpen(false);
     setTimeout(() => setSelectedEquipment(null), 300);
-  }, [setScheduleOpen, setSelectedEquipment]);
+    // Clear UIContext state since we're closing locally
+    clearScheduleCardState();
+  }, [setScheduleOpen, setSelectedEquipment, clearScheduleCardState]);
 
   // Sync with UIContext when schedule opens
   useEffect(() => {
