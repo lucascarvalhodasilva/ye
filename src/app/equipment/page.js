@@ -75,7 +75,8 @@ export default function EquipmentPage() {
       pushModal(modalId, () => setViewingReceipt(null));
       return () => removeModal(modalId);
     }
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
 
   useEffect(() => {
     if (showEquipmentModal) {
@@ -83,7 +84,8 @@ export default function EquipmentPage() {
       pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
-  }, [showEquipmentModal, handleModalClose, pushModal, removeModal, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showEquipmentModal, handleModalClose, pushModal, removeModal]);
 
   useEffect(() => {
     if (isFullScreen) {
@@ -91,7 +93,8 @@ export default function EquipmentPage() {
       pushModal(modalId, () => setIsFullScreen(false));
       return () => removeModal(modalId);
     }
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
 
   const totalDeductible = filteredEquipmentEntries.reduce((sum, entry) => sum + (entry.deductibleAmount || 0), 0);
 

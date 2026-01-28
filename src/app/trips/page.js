@@ -79,7 +79,8 @@ export default function TripsPage() {
       pushModal(modalId, () => setViewingReceipt(null));
       return () => removeModal(modalId);
     }
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
 
   // Register trip form modal with UIContext
   useEffect(() => {
@@ -88,7 +89,8 @@ export default function TripsPage() {
       pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
-  }, [showTripModal, handleModalClose, pushModal, removeModal, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showTripModal, handleModalClose, pushModal, removeModal]);
 
   return (
     <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 h-full overflow-hidden">

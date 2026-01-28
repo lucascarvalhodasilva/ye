@@ -76,7 +76,8 @@ export default function ExpensesPage() {
       pushModal(modalId, () => setViewingReceipt(null));
       return () => removeModal(modalId);
     }
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
 
   useEffect(() => {
     if (showExpenseModal) {
@@ -84,7 +85,8 @@ export default function ExpensesPage() {
       pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
-  }, [showExpenseModal, handleModalClose, pushModal, removeModal, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showExpenseModal, handleModalClose, pushModal, removeModal]);
 
   useEffect(() => {
     if (isFullScreen) {
@@ -92,7 +94,8 @@ export default function ExpensesPage() {
       pushModal(modalId, () => setIsFullScreen(false));
       return () => removeModal(modalId);
     }
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal, generateModalId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
 
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
   const totalAmount = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);
