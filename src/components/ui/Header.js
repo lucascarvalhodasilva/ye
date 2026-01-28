@@ -115,11 +115,15 @@ export default function Header() {
   const getPageConfig = () => {
     if (pathname === '/') return { 
       title: 'Dashboard', 
-      icon: null,
-      iconBg: '',
-      iconColor: '',
-      count: 0,
-      total: 0,
+      icon: (
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v13m8-13v13m8-13v13M4 17h16M4 11h16M4 7h16" />
+        </svg>
+      ),
+      iconBg: 'bg-primary/10',
+      iconColor: 'text-primary',
+      count: undefined,
+      total: null,
       totalPrefix: '',
       totalColor: ''
     };
@@ -175,8 +179,8 @@ export default function Header() {
       ),
       iconBg: 'bg-gray-500/10',
       iconColor: 'text-gray-600',
-      count: 0,
-      total: 0,
+      count: undefined,
+      total: null,
       totalPrefix: '',
       totalColor: ''
     };
@@ -213,7 +217,10 @@ export default function Header() {
             </h1>
             {pageConfig.icon && pageConfig.count !== undefined && (
               <p className="text-xs text-muted-foreground">
-                {pageConfig.count} Einträge • <span className={`${pageConfig.totalColor} font-medium`}>{pageConfig.totalPrefix}{pageConfig.total.toFixed(2)} €</span>
+                {pageConfig.count} Einträge
+                {pageConfig.total !== null && pageConfig.total !== undefined && (
+                  <span> • <span className={`${pageConfig.totalColor} font-medium`}>{pageConfig.totalPrefix}{pageConfig.total.toFixed(2)} €</span></span>
+                )}
               </p>
             )}
           </div>
