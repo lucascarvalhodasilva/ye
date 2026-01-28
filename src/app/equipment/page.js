@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useEquipmentForm } from './_features/hooks/useEquipmentForm';
 import { useEquipmentList } from './_features/hooks/useEquipmentList';
 import EquipmentForm from './_features/components/EquipmentForm';
@@ -12,6 +12,11 @@ export default function EquipmentPage() {
   const [highlightId, setHighlightId] = useState(null);
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
   const { pushModal, removeModal, generateModalId } = useUIContext();
+
+  // Use refs to store modal IDs so they persist across renders
+  const receiptViewerModalIdRef = useRef(null);
+  const equipmentFormModalIdRef = useRef(null);
+  const fullscreenModalIdRef = useRef(null);
 
   const {
     formData,
@@ -71,31 +76,42 @@ export default function EquipmentPage() {
   // Register modals with UIContext
   useEffect(() => {
     if (viewingReceipt) {
-      const modalId = generateModalId('receipt-viewer');
-      pushModal(modalId, () => setViewingReceipt(null));
-      return () => removeModal(modalId);
+      if (!receiptViewerModalIdRef.current) {
+        receiptViewerModalIdRef.current = generateModalId('receipt-viewer');
+      }
+      pushModal(receiptViewerModalIdRef.current, () => setViewingReceipt(null));
+      return () => {
+        removeModal(receiptViewerModalIdRef.current);
+        receiptViewerModalIdRef.current = null;
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
 
   useEffect(() => {
     if (showEquipmentModal) {
-      const modalId = generateModalId('equipment-form');
-      pushModal(modalId, handleModalClose);
-      return () => removeModal(modalId);
+      if (!equipmentFormModalIdRef.current) {
+        equipmentFormModalIdRef.current = generateModalId('equipment-form');
+      }
+      pushModal(equipmentFormModalIdRef.current, handleModalClose);
+      return () => {
+        removeModal(equipmentFormModalIdRef.current);
+        equipmentFormModalIdRef.current = null;
+      };
     }
-    // generateModalId is stable but shouldn't be in deps as it generates new values
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showEquipmentModal, handleModalClose, pushModal, removeModal]);
+  }, [showEquipmentModal, handleModalClose, pushModal, removeModal, generateModalId]);
 
   useEffect(() => {
     if (isFullScreen) {
-      const modalId = generateModalId('fullscreen-table');
-      pushModal(modalId, () => setIsFullScreen(false));
-      return () => removeModal(modalId);
+      if (!fullscreenModalIdRef.current) {
+        fullscreenModalIdRef.current = generateModalId('fullscreen-table');
+      }
+      pushModal(fullscreenModalIdRef.current, () => setIsFullScreen(false));
+      return () => {
+        removeModal(fullscreenModalIdRef.current);
+        fullscreenModalIdRef.current = null;
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
+  }, [isFullScreen, setIsFullScreen, pushModal, removeModal, generateModalId]);
 
   const totalDeductible = filteredEquipmentEntries.reduce((sum, entry) => sum + (entry.deductibleAmount || 0), 0);
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useExpenses } from './_features/hooks/useExpenses';
 import ExpenseForm from './_features/components/ExpenseForm';
 import ExpenseList from './_features/components/ExpenseList';
@@ -10,6 +10,11 @@ export default function ExpensesPage() {
   const [highlightId, setHighlightId] = useState(null);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const { pushModal, removeModal, generateModalId } = useUIContext();
+  
+  // Use refs to store modal IDs so they persist across renders
+  const receiptViewerModalIdRef = useRef(null);
+  const expenseFormModalIdRef = useRef(null);
+  const fullscreenModalIdRef = useRef(null);
   
   const {
     formData,
@@ -72,31 +77,42 @@ export default function ExpensesPage() {
   // Register modals with UIContext
   useEffect(() => {
     if (viewingReceipt) {
-      const modalId = generateModalId('receipt-viewer');
-      pushModal(modalId, () => setViewingReceipt(null));
-      return () => removeModal(modalId);
+      if (!receiptViewerModalIdRef.current) {
+        receiptViewerModalIdRef.current = generateModalId('receipt-viewer');
+      }
+      pushModal(receiptViewerModalIdRef.current, () => setViewingReceipt(null));
+      return () => {
+        removeModal(receiptViewerModalIdRef.current);
+        receiptViewerModalIdRef.current = null;
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
 
   useEffect(() => {
     if (showExpenseModal) {
-      const modalId = generateModalId('expense-form');
-      pushModal(modalId, handleModalClose);
-      return () => removeModal(modalId);
+      if (!expenseFormModalIdRef.current) {
+        expenseFormModalIdRef.current = generateModalId('expense-form');
+      }
+      pushModal(expenseFormModalIdRef.current, handleModalClose);
+      return () => {
+        removeModal(expenseFormModalIdRef.current);
+        expenseFormModalIdRef.current = null;
+      };
     }
-    // generateModalId is stable but shouldn't be in deps as it generates new values
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showExpenseModal, handleModalClose, pushModal, removeModal]);
+  }, [showExpenseModal, handleModalClose, pushModal, removeModal, generateModalId]);
 
   useEffect(() => {
     if (isFullScreen) {
-      const modalId = generateModalId('fullscreen-table');
-      pushModal(modalId, () => setIsFullScreen(false));
-      return () => removeModal(modalId);
+      if (!fullscreenModalIdRef.current) {
+        fullscreenModalIdRef.current = generateModalId('fullscreen-table');
+      }
+      pushModal(fullscreenModalIdRef.current, () => setIsFullScreen(false));
+      return () => {
+        removeModal(fullscreenModalIdRef.current);
+        fullscreenModalIdRef.current = null;
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
+  }, [isFullScreen, setIsFullScreen, pushModal, removeModal, generateModalId]);
 
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
   const totalAmount = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);

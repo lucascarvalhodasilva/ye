@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTripForm } from './_features/hooks/useTripForm';
 import { useTripList } from './_features/hooks/useTripList';
 import TripForm from './_features/components/TripForm';
@@ -14,6 +14,10 @@ export default function TripsPage() {
   const [showTripModal, setShowTripModal] = useState(false);
   const currentMonth = new Date().getMonth();
   const { pushModal, removeModal, generateModalId } = useUIContext();
+
+  // Use refs to store modal IDs so they persist across renders
+  const receiptViewerModalIdRef = useRef(null);
+  const tripFormModalIdRef = useRef(null);
 
   const { 
     formData, 
@@ -75,23 +79,30 @@ export default function TripsPage() {
   // Register receipt viewer modal with UIContext
   useEffect(() => {
     if (viewingReceipt) {
-      const modalId = generateModalId('receipt-viewer');
-      pushModal(modalId, () => setViewingReceipt(null));
-      return () => removeModal(modalId);
+      if (!receiptViewerModalIdRef.current) {
+        receiptViewerModalIdRef.current = generateModalId('receipt-viewer');
+      }
+      pushModal(receiptViewerModalIdRef.current, () => setViewingReceipt(null));
+      return () => {
+        removeModal(receiptViewerModalIdRef.current);
+        receiptViewerModalIdRef.current = null;
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
 
   // Register trip form modal with UIContext
   useEffect(() => {
     if (showTripModal) {
-      const modalId = generateModalId('trip-form');
-      pushModal(modalId, handleModalClose);
-      return () => removeModal(modalId);
+      if (!tripFormModalIdRef.current) {
+        tripFormModalIdRef.current = generateModalId('trip-form');
+      }
+      pushModal(tripFormModalIdRef.current, handleModalClose);
+      return () => {
+        removeModal(tripFormModalIdRef.current);
+        tripFormModalIdRef.current = null;
+      };
     }
-    // generateModalId is stable but shouldn't be in deps as it generates new values
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showTripModal, handleModalClose, pushModal, removeModal]);
+  }, [showTripModal, handleModalClose, pushModal, removeModal, generateModalId]);
 
   return (
     <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 h-full overflow-hidden">
