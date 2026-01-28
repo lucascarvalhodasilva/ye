@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTripForm } from './_features/hooks/useTripForm';
 import { useTripList } from './_features/hooks/useTripList';
 import TripForm from './_features/components/TripForm';
@@ -13,7 +13,11 @@ export default function TripsPage() {
   const [highlightId, setHighlightId] = useState(null);
   const [showTripModal, setShowTripModal] = useState(false);
   const currentMonth = new Date().getMonth();
-  const { pushModal, removeModal, generateModalId } = useUIContext();
+  const { pushModal, removeModal } = useUIContext();
+  
+  // Refs to store stable modal IDs
+  const receiptModalIdRef = useRef(null);
+  const tripModalIdRef = useRef(null);
 
   const { 
     formData, 
@@ -34,6 +38,10 @@ export default function TripsPage() {
     hasChanges
   } = useTripForm();
 
+  // Ref to hold latest cancelEdit function
+  const cancelEditRef = useRef(cancelEdit);
+  cancelEditRef.current = cancelEdit;
+
   // Close modal after successful submit
   const handleFormSubmit = (e) => {
     handleSubmit(e, (newId) => {
@@ -44,11 +52,11 @@ export default function TripsPage() {
     });
   };
 
-  // Close modal and cancel edit
-  const handleModalClose = () => {
+  // Close modal and cancel edit - memoized to prevent effect re-runs
+  const handleModalClose = useCallback(() => {
     setShowTripModal(false);
-    cancelEdit(); // Always reset form when closing modal
-  };
+    cancelEditRef.current(); // Use ref to avoid dependency
+  }, []);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -75,20 +83,32 @@ export default function TripsPage() {
   // Register receipt viewer modal with UIContext
   useEffect(() => {
     if (viewingReceipt) {
-      const modalId = generateModalId('receipt-viewer');
+      const modalId = `receipt-viewer-${Date.now()}`;
+      receiptModalIdRef.current = modalId;
       pushModal(modalId, () => setViewingReceipt(null));
-      return () => removeModal(modalId);
+      return () => {
+        if (receiptModalIdRef.current) {
+          removeModal(receiptModalIdRef.current);
+          receiptModalIdRef.current = null;
+        }
+      };
     }
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
 
   // Register trip form modal with UIContext
   useEffect(() => {
     if (showTripModal) {
-      const modalId = generateModalId('trip-form');
+      const modalId = `trip-form-${Date.now()}`;
+      tripModalIdRef.current = modalId;
       pushModal(modalId, handleModalClose);
-      return () => removeModal(modalId);
+      return () => {
+        if (tripModalIdRef.current) {
+          removeModal(tripModalIdRef.current);
+          tripModalIdRef.current = null;
+        }
+      };
     }
-  }, [showTripModal, handleModalClose, pushModal, removeModal, generateModalId]);
+  }, [showTripModal, handleModalClose, pushModal, removeModal]);
 
   return (
     <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 h-full overflow-hidden">

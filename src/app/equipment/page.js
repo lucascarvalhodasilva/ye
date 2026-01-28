@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useEquipmentForm } from './_features/hooks/useEquipmentForm';
 import { useEquipmentList } from './_features/hooks/useEquipmentList';
 import EquipmentForm from './_features/components/EquipmentForm';
@@ -13,7 +13,12 @@ export default function EquipmentPage() {
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
-  const { pushModal, removeModal, generateModalId } = useUIContext();
+  const { pushModal, removeModal } = useUIContext();
+  
+  // Refs to store stable modal IDs
+  const receiptModalIdRef = useRef(null);
+  const equipmentModalIdRef = useRef(null);
+  const fullscreenModalIdRef = useRef(null);
 
   const {
     formData,
@@ -32,6 +37,10 @@ export default function EquipmentPage() {
     hasChanges
   } = useEquipmentForm();
 
+  // Ref to hold latest cancelEdit function
+  const cancelEditRef = useRef(cancelEdit);
+  cancelEditRef.current = cancelEdit;
+
   const handleFormSubmit = (e) => {
     handleSubmit(e, (newId) => {
       setHighlightId(newId);
@@ -40,10 +49,11 @@ export default function EquipmentPage() {
     });
   };
 
-  const handleModalClose = () => {
+  // Close modal and cancel edit - memoized to prevent effect re-runs
+  const handleModalClose = useCallback(() => {
     setShowEquipmentModal(false);
-    cancelEdit(); // Always reset form when closing modal
-  };
+    cancelEditRef.current(); // Use ref to avoid dependency
+  }, []);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -101,27 +111,45 @@ export default function EquipmentPage() {
   // Register modals with UIContext
   useEffect(() => {
     if (viewingReceipt) {
-      const modalId = generateModalId('receipt-viewer');
+      const modalId = `receipt-viewer-${Date.now()}`;
+      receiptModalIdRef.current = modalId;
       pushModal(modalId, () => setViewingReceipt(null));
-      return () => removeModal(modalId);
+      return () => {
+        if (receiptModalIdRef.current) {
+          removeModal(receiptModalIdRef.current);
+          receiptModalIdRef.current = null;
+        }
+      };
     }
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
 
   useEffect(() => {
     if (showEquipmentModal) {
-      const modalId = generateModalId('equipment-form');
+      const modalId = `equipment-form-${Date.now()}`;
+      equipmentModalIdRef.current = modalId;
       pushModal(modalId, handleModalClose);
-      return () => removeModal(modalId);
+      return () => {
+        if (equipmentModalIdRef.current) {
+          removeModal(equipmentModalIdRef.current);
+          equipmentModalIdRef.current = null;
+        }
+      };
     }
-  }, [showEquipmentModal, handleModalClose, pushModal, removeModal, generateModalId]);
+  }, [showEquipmentModal, handleModalClose, pushModal, removeModal]);
 
   useEffect(() => {
     if (isFullScreen) {
-      const modalId = generateModalId('fullscreen-table');
+      const modalId = `fullscreen-table-${Date.now()}`;
+      fullscreenModalIdRef.current = modalId;
       pushModal(modalId, () => setIsFullScreen(false));
-      return () => removeModal(modalId);
+      return () => {
+        if (fullscreenModalIdRef.current) {
+          removeModal(fullscreenModalIdRef.current);
+          fullscreenModalIdRef.current = null;
+        }
+      };
     }
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal, generateModalId]);
+  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
 
   const totalDeductible = filteredEquipmentEntries.reduce((sum, entry) => sum + (entry.deductibleAmount || 0), 0);
 

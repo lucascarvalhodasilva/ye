@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useExpenses } from './_features/hooks/useExpenses';
 import ExpenseForm from './_features/components/ExpenseForm';
 import ExpenseList from './_features/components/ExpenseList';
@@ -9,7 +9,12 @@ import { useUIContext } from '@/context/UIContext';
 export default function ExpensesPage() {
   const [highlightId, setHighlightId] = useState(null);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
-  const { pushModal, removeModal, generateModalId } = useUIContext();
+  const { pushModal, removeModal } = useUIContext();
+  
+  // Refs to store stable modal IDs
+  const receiptModalIdRef = useRef(null);
+  const expenseModalIdRef = useRef(null);
+  const fullscreenModalIdRef = useRef(null);
   
   const {
     formData,
@@ -39,6 +44,10 @@ export default function ExpensesPage() {
     hasChanges
   } = useExpenses();
 
+  // Ref to hold latest cancelEdit function
+  const cancelEditRef = useRef(cancelEdit);
+  cancelEditRef.current = cancelEdit;
+
   const handleFormSubmit = (e) => {
     handleSubmit(e, (newId) => {
       setHighlightId(newId);
@@ -47,10 +56,11 @@ export default function ExpensesPage() {
     });
   };
 
-  const handleModalClose = () => {
+  // Close modal and cancel edit - memoized to prevent effect re-runs
+  const handleModalClose = useCallback(() => {
     setShowExpenseModal(false);
-    cancelEdit(); // Always reset form when closing modal
-  };
+    cancelEditRef.current(); // Use ref to avoid dependency
+  }, []);
 
   const handleEdit = async (entry) => {
     await startEdit(entry);
@@ -72,27 +82,45 @@ export default function ExpensesPage() {
   // Register modals with UIContext
   useEffect(() => {
     if (viewingReceipt) {
-      const modalId = generateModalId('receipt-viewer');
+      const modalId = `receipt-viewer-${Date.now()}`;
+      receiptModalIdRef.current = modalId;
       pushModal(modalId, () => setViewingReceipt(null));
-      return () => removeModal(modalId);
+      return () => {
+        if (receiptModalIdRef.current) {
+          removeModal(receiptModalIdRef.current);
+          receiptModalIdRef.current = null;
+        }
+      };
     }
-  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt, generateModalId]);
+  }, [viewingReceipt, pushModal, removeModal, setViewingReceipt]);
 
   useEffect(() => {
     if (showExpenseModal) {
-      const modalId = generateModalId('expense-form');
+      const modalId = `expense-form-${Date.now()}`;
+      expenseModalIdRef.current = modalId;
       pushModal(modalId, handleModalClose);
-      return () => removeModal(modalId);
+      return () => {
+        if (expenseModalIdRef.current) {
+          removeModal(expenseModalIdRef.current);
+          expenseModalIdRef.current = null;
+        }
+      };
     }
-  }, [showExpenseModal, handleModalClose, pushModal, removeModal, generateModalId]);
+  }, [showExpenseModal, handleModalClose, pushModal, removeModal]);
 
   useEffect(() => {
     if (isFullScreen) {
-      const modalId = generateModalId('fullscreen-table');
+      const modalId = `fullscreen-table-${Date.now()}`;
+      fullscreenModalIdRef.current = modalId;
       pushModal(modalId, () => setIsFullScreen(false));
-      return () => removeModal(modalId);
+      return () => {
+        if (fullscreenModalIdRef.current) {
+          removeModal(fullscreenModalIdRef.current);
+          fullscreenModalIdRef.current = null;
+        }
+      };
     }
-  }, [isFullScreen, setIsFullScreen, pushModal, removeModal, generateModalId]);
+  }, [isFullScreen, setIsFullScreen, pushModal, removeModal]);
 
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
   const totalAmount = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);

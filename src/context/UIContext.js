@@ -42,7 +42,14 @@ export function UIProvider({ children }) {
   }, []);
 
   const removeModal = useCallback((modalId) => {
-    setModalStack(prev => prev.filter(item => item.id !== modalId));
+    setModalStack(prev => {
+      const filtered = prev.filter(item => item.id !== modalId);
+      // Only return new array if something was actually removed
+      if (filtered.length === prev.length) {
+        return prev;
+      }
+      return filtered;
+    });
   }, []);
 
   const generateModalId = useCallback((prefix) => {
