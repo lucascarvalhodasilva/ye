@@ -1,17 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useUIContext } from '@/context/UIContext';
 
 export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, message, confirmText = "Löschen", cancelText = "Abbrechen", subtitle = "Diese Aktion kann nicht rückgängig gemacht werden" }) {
-  const { pushModal, removeModal, generateModalId } = useUIContext();
+  const { pushModal, removeModal } = useUIContext();
+  
+  // Refs to store stable values
+  const modalIdRef = useRef(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (isOpen) {
-      const modalId = generateModalId('confirmation');
-      pushModal(modalId, onClose);
-      return () => removeModal(modalId);
+      const modalId = `confirmation-${Date.now()}`;
+      modalIdRef.current = modalId;
+      pushModal(modalId, () => onCloseRef.current());
+      return () => {
+        if (modalIdRef.current) {
+          removeModal(modalIdRef.current);
+          modalIdRef.current = null;
+        }
+      };
     }
-  }, [isOpen, onClose, pushModal, removeModal, generateModalId]);
+  }, [isOpen, pushModal, removeModal]);
 
   if (!isOpen) return null;
 
@@ -58,7 +69,7 @@ export default function ConfirmationModal({ isOpen, onClose, onConfirm, title, m
               onConfirm();
               onClose();
             }}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium transition-colors shadow-sm"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 !text-white font-medium transition-colors shadow-sm"
             aria-label={confirmText}
           >
             {confirmText}
