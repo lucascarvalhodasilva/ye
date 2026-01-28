@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTripForm } from './_features/hooks/useTripForm';
 import { useTripList } from './_features/hooks/useTripList';
 import TripForm from './_features/components/TripForm';
@@ -45,10 +45,10 @@ export default function TripsPage() {
   };
 
   // Close modal and cancel edit
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setShowTripModal(false);
     cancelEdit(); // Always reset form when closing modal
-  };
+  }, [cancelEdit]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -89,8 +89,7 @@ export default function TripsPage() {
       pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showTripModal, handleModalClose, pushModal, removeModal]);
+  }, [showTripModal, handleModalClose, pushModal, removeModal, generateModalId]);
 
   return (
     <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 h-full overflow-hidden">

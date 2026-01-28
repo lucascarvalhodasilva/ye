@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useEquipmentForm } from './_features/hooks/useEquipmentForm';
 import { useEquipmentList } from './_features/hooks/useEquipmentList';
 import EquipmentForm from './_features/components/EquipmentForm';
@@ -39,10 +39,10 @@ export default function EquipmentPage() {
     });
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setShowEquipmentModal(false);
     cancelEdit(); // Always reset form when closing modal
-  };
+  }, [cancelEdit]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -84,8 +84,7 @@ export default function EquipmentPage() {
       pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showEquipmentModal, handleModalClose, pushModal, removeModal]);
+  }, [showEquipmentModal, handleModalClose, pushModal, removeModal, generateModalId]);
 
   useEffect(() => {
     if (isFullScreen) {

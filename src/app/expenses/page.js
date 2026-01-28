@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useExpenses } from './_features/hooks/useExpenses';
 import ExpenseForm from './_features/components/ExpenseForm';
 import ExpenseList from './_features/components/ExpenseList';
@@ -47,10 +47,10 @@ export default function ExpensesPage() {
     });
   };
 
-  const handleModalClose = () => {
+  const handleModalClose = useCallback(() => {
     setShowExpenseModal(false);
     cancelEdit(); // Always reset form when closing modal
-  };
+  }, [cancelEdit]);
 
   const handleEdit = async (entry) => {
     await startEdit(entry);
@@ -85,8 +85,7 @@ export default function ExpensesPage() {
       pushModal(modalId, handleModalClose);
       return () => removeModal(modalId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showExpenseModal, handleModalClose, pushModal, removeModal]);
+  }, [showExpenseModal, handleModalClose, pushModal, removeModal, generateModalId]);
 
   useEffect(() => {
     if (isFullScreen) {
