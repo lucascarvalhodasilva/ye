@@ -3,6 +3,7 @@ import { formatDate } from '@/utils/dateFormatter';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import PDFViewer from '@/components/shared/PDFViewerDynamic';
 import SwipeableListItem from '@/components/shared/SwipeableListItem';
+import FullScreenTableView from './FullScreenTableView';
 
 export default function ExpenseList({ 
   filteredEntries, 
@@ -22,8 +23,6 @@ export default function ExpenseList({
   const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, entry: null });
   const [collapsedMonths, setCollapsedMonths] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [fullscreenSearchQuery, setFullscreenSearchQuery] = useState('');
-  const [fullscreenCollapsedMonths, setFullscreenCollapsedMonths] = useState({});
 
   const toggleMonth = (key) => {
     setCollapsedMonths(prev => ({ ...prev, [key]: !prev[key] }));
@@ -81,44 +80,6 @@ export default function ExpenseList({
 
   const totalAmount = filteredEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
-  // Toggle month for fullscreen view
-  const toggleFullscreenMonth = (key) => {
-    setFullscreenCollapsedMonths(prev => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  // Group entries by month for fullscreen view
-  const fullscreenEntriesByMonth = useMemo(() => {
-    const filtered = fullscreenSearchQuery 
-      ? filteredEntries.filter(entry => 
-          (entry.description || '').toLowerCase().includes(fullscreenSearchQuery.toLowerCase())
-        )
-      : filteredEntries;
-    
-    const grouped = {};
-    filtered.forEach(entry => {
-      const date = new Date(entry.date);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-      if (!grouped[key]) {
-        grouped[key] = {
-          month: date.toLocaleDateString('de-DE', { month: 'long' }),
-          year: date.getFullYear(),
-          entries: [],
-          total: 0
-        };
-      }
-      grouped[key].entries.push(entry);
-      grouped[key].total += entry.amount;
-    });
-    // Sort by date descending (newest first)
-    return Object.entries(grouped)
-      .sort(([a], [b]) => b.localeCompare(a))
-      .map(([, value]) => value);
-  }, [filteredEntries, fullscreenSearchQuery]);
-
-  // Calculate totals for fullscreen view
-  const fullscreenTotalCount = fullscreenEntriesByMonth.reduce((sum, group) => sum + group.entries.length, 0);
-  const fullscreenTotalAmount = fullscreenEntriesByMonth.reduce((sum, group) => sum + group.total, 0);
-
   // Render a single expense entry
   const renderExpenseEntry = (entry) => {
     return (
@@ -164,250 +125,20 @@ export default function ExpenseList({
     );
   };
 
-  // Render fullscreen modal
-  if (isFullScreen) {
-    return (
-      <>
-        <div className="fixed inset-0 z-50 bg-background flex flex-col">
-          {/* 1. Sticky Summary Header */}
-          <div className="sticky top-0 z-10 px-4 pt-4 shrink-0 bg-background">
-            <div className="rounded-2xl border border-border/50 bg-card/95 backdrop-blur-md shadow-lg p-4">
-              <div className="flex items-center justify-between">
-                {/* Module Info + Icon */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-rose-500/10 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-base font-semibold">Ausgaben {selectedYear}</h2>
-                    <p className="text-xs text-muted-foreground">
-                      {fullscreenTotalCount} {fullscreenTotalCount === 1 ? 'Eintrag' : 'Einträge'} · {fullscreenTotalAmount.toFixed(2)}€
-                    </p>
-                  </div>
-                </div>
-                
-                {/* Close Button */}
-                <button 
-                  onClick={() => setIsFullScreen(false)}
-                  className="w-10 h-10 rounded-xl hover:bg-muted/50 transition-colors flex items-center justify-center text-muted-foreground hover:text-foreground"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-              </div>
-              
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <div className="p-3 rounded-xl bg-muted/30">
-                  <p className="text-[10px] text-muted-foreground">EINTRÄGE</p>
-                  <p className="text-lg font-semibold">{fullscreenTotalCount}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-rose-500/10">
-                  <p className="text-[10px] text-rose-600 font-medium">GESAMT</p>
-                  <p className="text-lg font-semibold text-rose-600">{fullscreenTotalAmount.toFixed(2)}€</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* 2. Action Bar */}
-          <div className="px-4 py-4 shrink-0">
-            <div className="flex items-center gap-3">
-              {/* Search */}
-              <div className="relative flex-1">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Suchen..."
-                  value={fullscreenSearchQuery}
-                  onChange={(e) => setFullscreenSearchQuery(e.target.value)}
-                  className="w-full h-12 pl-11 pr-10 rounded-xl bg-white/60 dark:bg-white/5 border border-border/50 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-rose-500/20"
-                />
-                {fullscreenSearchQuery && (
-                  <button
-                    onClick={() => setFullscreenSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted/80 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              {/* Add Button */}
-              {onAddExpense && (
-                <button 
-                  onClick={onAddExpense}
-                  className="h-12 px-5 rounded-xl bg-rose-500 hover:bg-rose-500/90 !text-white transition-all shadow-sm flex items-center justify-center text-base font-medium gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                  </svg>
-                  Hinzufügen
-                </button>
-              )}
-            </div>
-          </div>
-          
-          {/* 3. Scrollable List */}
-          <div className="flex-1 overflow-y-auto pb-6">
-            {fullscreenTotalCount === 0 ? (
-              /* Enhanced Empty State */
-              <div className="flex flex-col items-center justify-center py-20 px-6">
-                {/* Animated Icon */}
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 bg-rose-500/10 rounded-full blur-2xl animate-pulse" />
-                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-500/20 to-rose-600/20 border border-rose-500/20 flex items-center justify-center">
-                    <svg className="w-10 h-10 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                </div>
-                
-                <h3 className="text-base font-semibold mb-2">Keine Ausgaben für {selectedYear}</h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-xs text-center">
-                  Erfassen Sie Ihre erste Ausgabe
-                </p>
-                
-                {/* CTA Button */}
-                {onAddExpense && (
-                  <button 
-                    onClick={onAddExpense}
-                    className="px-6 py-3 rounded-xl bg-rose-500 text-white flex items-center gap-2 hover:bg-rose-500/90 transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Erste Ausgabe hinzufügen
-                  </button>
-                )}
-              </div>
-            ) : (
-              /* Month groups with seamless items */
-              fullscreenEntriesByMonth.map((monthGroup) => {
-                const monthKey = `${monthGroup.year}-${monthGroup.month}`;
-                const isCollapsed = fullscreenCollapsedMonths[monthKey];
-                
-                return (
-                  <div key={monthKey} className="mb-6 px-4">
-                    {/* Sticky Month Header */}
-                    <div className="sticky top-[180px] z-[9] bg-background/95 backdrop-blur-md py-3">
-                      <button 
-                        onClick={() => toggleFullscreenMonth(monthKey)}
-                        className="flex items-center gap-3 w-full"
-                      >
-                        <svg 
-                          className={`w-4 h-4 text-muted-foreground transition-transform ${isCollapsed ? 'rotate-0' : 'rotate-90'}`} 
-                          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span className="text-sm font-semibold">{monthGroup.month} {monthGroup.year}</span>
-                        <span className="text-xs px-2 py-1 rounded-lg bg-muted/50">{monthGroup.entries.length}</span>
-                        <span className="text-xs font-medium ml-auto">{monthGroup.total.toFixed(2)}€</span>
-                      </button>
-                    </div>
-
-                    {/* Seamless List */}
-                    {!isCollapsed && (
-                      <div className="space-y-0">
-                        {monthGroup.entries.map((entry, index) => (
-                          <SwipeableListItem
-                            key={entry.id}
-                            itemId={entry.id}
-                            className={`
-                              border-b border-border/20 
-                              hover:bg-muted/30 
-                              transition-colors
-                              ${index === 0 ? 'border-t border-border/20' : ''}
-                            `}
-                            hasReceipt={!!entry.receiptFileName}
-                            onEdit={() => onEdit && onEdit(entry)}
-                            onDelete={() => setDeleteConfirmation({ isOpen: true, entry })}
-                            onViewReceipt={() => handleViewReceipt(entry)}
-                          >
-                            <div className="py-3 px-4">
-                              <div className="flex items-center gap-4">
-                                {/* Date Badge */}
-                                <div className="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 bg-rose-500/10 text-rose-600">
-                                  <span className="text-base font-bold leading-none">
-                                    {new Date(entry.date).getDate()}
-                                  </span>
-                                  <span className="text-[9px] uppercase font-medium mt-0.5 opacity-70">
-                                    {new Date(entry.date).toLocaleDateString('de-DE', { month: 'short' })}
-                                  </span>
-                                </div>
-
-                                {/* Expense Details */}
-                                <div className="flex-1 min-w-0">
-                                  <span className="text-sm font-medium text-foreground truncate block">
-                                    {entry.description || 'Ausgabe'}
-                                  </span>
-                                  
-                                  <span className="text-xs text-muted-foreground">{formatDate(entry.date)}</span>
-                                </div>
-
-                                {/* Amount */}
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <span className="text-base font-bold text-rose-600">
-                                    -{entry.amount.toFixed(2)} €
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </SwipeableListItem>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Receipt Viewer Modal - Only show in fullscreen mode */}
-        {viewingReceipt && (
-          <div 
-            className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" 
-            onClick={() => setViewingReceipt(null)}
-          >
-            <div className="relative flex flex-col items-center max-w-4xl w-full h-full">
-              {viewingReceipt.type === 'pdf' ? (
-                <PDFViewer 
-                  source={viewingReceipt.data}
-                  onClose={() => setViewingReceipt(null)}
-                />
-              ) : (
-                <>
-                  <img 
-                    src={viewingReceipt.data} 
-                    alt="Beleg" 
-                    className="max-w-full max-h-[80vh] rounded-lg bg-black/50 shadow-2xl object-contain"
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <button 
-                    onClick={() => setViewingReceipt(null)}
-                    className="mt-4 px-6 py-2.5 font-medium rounded-xl bg-white text-gray-700 shadow-lg transition-colors hover:bg-gray-100"
-                  >
-                    Schließen
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </>
-    );
-  }
-
   return (
-    <div className="flex flex-col h-full">
+    <>
+      <FullScreenTableView
+        isOpen={isFullScreen}
+        onClose={() => setIsFullScreen(false)}
+        entries={filteredEntries}
+        selectedYear={selectedYear}
+        onAddExpense={onAddExpense}
+        onViewReceipt={handleViewReceipt}
+        onEdit={onEdit}
+        onDelete={(entry) => setDeleteConfirmation({ isOpen: true, entry })}
+      />
+
+      <div className="flex flex-col h-full">
       {/* Search and Action Buttons */}
       <div className="flex items-center gap-3 pb-3 shrink-0">
         <div className="relative flex-1">
@@ -545,5 +276,6 @@ export default function ExpenseList({
         message={deleteConfirmation.entry ? `Möchten Sie die Ausgabe "${deleteConfirmation.entry.description}" vom ${formatDate(deleteConfirmation.entry.date)} wirklich löschen?` : ''}
       />
     </div>
+    </>
   );
 }

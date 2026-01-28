@@ -137,27 +137,48 @@ export default function FullScreenTableView({
     <div className="fixed inset-0 bg-background z-9999 flex flex-col animate-in fade-in duration-200">
       {/* Header */}
       <div className="pt-[env(safe-area-inset-top)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] bg-card border-b border-border">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            <h2 className="text-base font-semibold text-foreground">Fahrtenbuch {selectedYear}</h2>
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded">{tripEntries.length} Einträge</span>
+        <div className="flex flex-col gap-3 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <div>
+                <h2 className="text-base font-semibold text-foreground">Fahrtenbuch {selectedYear}</h2>
+                <p className="text-xs text-muted-foreground">{tripEntries.length} {tripEntries.length === 1 ? 'Eintrag' : 'Einträge'}</p>
+              </div>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-3 rounded-xl bg-muted/30">
+              <p className="text-[10px] text-muted-foreground">EINTRÄGE</p>
+              <p className="text-lg font-semibold">{tripEntries.length}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-500/10">
+              <p className="text-[10px] text-blue-600 font-medium">FAHRTKOSTEN</p>
+              <p className="text-lg font-semibold text-blue-600">{totalMileage.toFixed(2)}€</p>
+            </div>
+            <div className="p-3 rounded-xl bg-emerald-500/10">
+              <p className="text-[10px] text-emerald-700 font-medium">GESAMT ABZUG</p>
+              <p className="text-lg font-semibold text-emerald-700">{totalSum.toFixed(2)}€</p>
+            </div>
+          </div>
+
+          <div className="h-1" />
         </div>
       </div>
       
       {/* Table Content */}
-      <div className="flex-1 overflow-auto pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+      <div className="flex-1 overflow-auto pb-[env(safe-area-inset-bottom)] px-4 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
         <table className="w-full text-sm border-collapse min-w-[600px]">
           <thead className="sticky top-0 z-20">
             <tr className="bg-muted text-muted-foreground">
@@ -268,12 +289,21 @@ export default function FullScreenTableView({
       </div>
       {/* Footer pinned to bottom of the overlay */}
       <div className="shrink-0 border-t border-border bg-card/95 backdrop-blur-sm px-4 py-3 pl-[calc(1rem+env(safe-area-inset-left))] pr-[calc(1rem+env(safe-area-inset-right))]">
-        <div className="max-w-5xl w-full mx-auto flex items-center justify-between text-sm font-bold text-foreground">
-          <span>Gesamtsumme {selectedYear}</span>
-          <div className="flex items-center gap-6 tabular-nums">
-            <span className="text-emerald-600">{totalDeductible.toFixed(2)} €</span>
-            <span className="text-blue-600">{totalMileage.toFixed(2)} €</span>
-            <span className="text-foreground bg-emerald-500/10 px-3 py-1.5 rounded-lg text-base">{totalSum.toFixed(2)} €</span>
+        <div className="max-w-5xl w-full mx-auto flex items-center justify-between text-sm text-foreground tabular-nums">
+          <span className="font-semibold">Gesamtsumme {selectedYear}</span>
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="text-[11px] text-muted-foreground">Verpflegung</span>
+              <span className="text-base font-semibold text-emerald-600">{totalDeductible.toFixed(2)} €</span>
+            </div>
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="text-[11px] text-muted-foreground">Fahrtkosten</span>
+              <span className="text-base font-semibold text-blue-600">{totalMileage.toFixed(2)} €</span>
+            </div>
+            <div className="flex flex-col items-end gap-0.5">
+              <span className="text-[11px] text-muted-foreground">Gesamt</span>
+              <span className="text-base font-semibold text-foreground">{totalSum.toFixed(2)} €</span>
+            </div>
           </div>
         </div>
       </div>
