@@ -27,11 +27,16 @@ export default function SwipeableListItem({
   const swipeState = useRef({ id: null, startX: 0, translateX: 0, dragging: false });
 
   // Calculate actions width based on available buttons
-  // Each button is w-10 (40px), gap-2 (8px between), pr-3 (12px padding right)
-  const baseActionsWidth = 100; // edit + delete: 40 + 8 + 40 + 12 = 100px
-  const scheduleButtonWidth = 48; // schedule button + gap: 40 + 8 = 48px
-  const actionsWidth = onViewSchedule ? baseActionsWidth + scheduleButtonWidth : baseActionsWidth;
-  const receiptWidth = 56; // Width for receipt button (1 button, proportional)
+  // Each button is w-10 (40px), gap-2 (8px between), pl-3/pr-3 (12px padding)
+  const actionsWidth = 100; // edit + delete: 40 + 8 + 40 + 12 = 100px (right side, swipe left)
+  
+  // Left side width calculation (swipe right)
+  // Receipt button + optional schedule button
+  const baseLeftWidth = 56; // receipt: 40 + 4 (gap on right) + 12 (padding) = 56px
+  const scheduleButtonWidth = 48; // schedule: 40 + 8 (gap) = 48px
+  const leftActionsWidth = hasReceipt 
+    ? (onViewSchedule ? baseLeftWidth + scheduleButtonWidth : baseLeftWidth)
+    : 0;
 
   const handlePointerDown = (e) => {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -46,15 +51,15 @@ export default function SwipeableListItem({
     
     // Limit swipe range
     if (delta < 0) {
-      // Swipe left - show actions
+      // Swipe left - show actions (edit, delete)
       const maxSwipe = -actionsWidth;
       if (delta < maxSwipe) delta = maxSwipe;
     } else {
-      // Swipe right - show receipt (only if has receipt)
-      if (!hasReceipt) {
+      // Swipe right - show receipt and/or schedule
+      if (!hasReceipt && !onViewSchedule) {
         delta = 0;
       } else {
-        const maxSwipe = receiptWidth;
+        const maxSwipe = leftActionsWidth;
         if (delta > maxSwipe) delta = maxSwipe;
       }
     }
@@ -74,10 +79,10 @@ export default function SwipeableListItem({
     
     // Determine if swipe threshold was met (50px)
     if (delta < -50) {
-      // Swipe left - show actions
+      // Swipe left - show actions (edit, delete)
       newDirection = 'left';
-    } else if (delta > 50 && hasReceipt) {
-      // Swipe right - show receipt
+    } else if (delta > 50 && (hasReceipt || onViewSchedule)) {
+      // Swipe right - show receipt and/or schedule
       newDirection = 'right';
     }
     
@@ -86,7 +91,7 @@ export default function SwipeableListItem({
     // Animate to final position
     const el = document.getElementById(`swipe-inner-${itemId}`);
     if (el) {
-      const targetX = newDirection === 'left' ? -actionsWidth : newDirection === 'right' ? receiptWidth : 0;
+      const targetX = newDirection === 'left' ? -actionsWidth : newDirection === 'right' ? leftActionsWidth : 0;
       el.style.transform = `translateX(${targetX}px)`;
     }
     
@@ -128,23 +133,36 @@ export default function SwipeableListItem({
       onMouseMove={handlePointerMove}
       onTouchMove={handlePointerMove}
     >
-      {/* Receipt Button (Left side - revealed on swipe right) */}
-      {hasReceipt && (
+      {/* Left Side Buttons (revealed on swipe right) - Receipt and/or Schedule */}
+      {(hasReceipt || onViewSchedule) && (
         <div 
-          className={`absolute left-0 top-0 h-full flex items-center justify-start pl-3 z-0 transition-opacity duration-200 ${
+          className={`absolute left-0 top-0 h-full flex items-center justify-start gap-2 pl-3 z-0 transition-opacity duration-200 ${
             swipeDirection === 'right' ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{ width: `${receiptWidth}px` }}
+          style={{ width: `${leftActionsWidth}px` }}
         >
-          <button
-            onClick={(e) => handleActionClick('receipt', e)}
-            className="w-10 h-10 bg-yellow-500/80 hover:bg-yellow-500/90 text-white transition-all flex items-center justify-center active:scale-95 rounded-xl"
-            aria-label="Beleg ansehen"
-          >
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </button>
+          {hasReceipt && (
+            <button
+              onClick={(e) => handleActionClick('receipt', e)}
+              className="w-10 h-10 bg-yellow-500/80 hover:bg-yellow-500/90 text-white transition-all flex items-center justify-center active:scale-95 rounded-xl"
+              aria-label="Beleg ansehen"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+          )}
+          {onViewSchedule && (
+            <button
+              onClick={(e) => handleActionClick('schedule', e)}
+              className="w-10 h-10 bg-blue-500/80 hover:bg-blue-500/90 text-white transition-all flex items-center justify-center active:scale-95 rounded-xl"
+              aria-label="Abschreibungsplan anzeigen"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </button>
+          )}
         </div>
       )}
 
@@ -158,24 +176,13 @@ export default function SwipeableListItem({
         {children}
       </div>
 
-      {/* Action Buttons (Right side - revealed on swipe left) */}
+      {/* Right Side Action Buttons (revealed on swipe left) - Edit and Delete */}
       <div 
         className={`absolute top-0 right-0 h-full flex items-center justify-end gap-2 pr-3 z-0 transition-opacity duration-200 ${
           swipeDirection === 'left' ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ width: `${actionsWidth}px` }}
       >
-        {onViewSchedule && (
-          <button
-            onClick={(e) => handleActionClick('schedule', e)}
-            className="w-10 h-10 bg-blue-500/80 hover:bg-blue-500/90 text-white transition-all flex items-center justify-center active:scale-95 rounded-xl"
-            aria-label="Abschreibungsplan anzeigen"
-          >
-            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </button>
-        )}
         <button
           onClick={(e) => handleActionClick('edit', e)}
           className="w-10 h-10 bg-primary/80 hover:bg-primary/90 text-white transition-all flex items-center justify-center active:scale-95 rounded-xl"
