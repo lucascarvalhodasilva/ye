@@ -30,7 +30,7 @@ export default function SwipeableListItem({
   const numRightActions = 2; // edit + delete
   const numLeftActions = 1 + (onSchedule ? 1 : 0); // receipt (always) + optional schedule
   const actionsWidth = numRightActions * 48 + Math.max(0, numRightActions - 1) * 8; // 48px per button + 8px gap
-  const leftActionsWidth = numLeftActions * 48 + Math.max(0, numLeftActions - 1) * 8; // Left side actions width
+  const leftActionsWidth = numLeftActions * 48 + Math.max(0, numLeftActions - 1) * 8 + 12; // 48px per button + 8px gap + 12px padding
   
   // Store widths in ref for event handlers
   const widthsRef = useRef({ actionsWidth, leftActionsWidth, onSchedule });
