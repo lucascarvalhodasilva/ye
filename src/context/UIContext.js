@@ -6,6 +6,8 @@ const UIContext = createContext();
 export function UIProvider({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [modalStack, setModalStack] = useState([]);
+  const [scheduleCardOpen, setScheduleCardOpen] = useState(false);
+  const [closeScheduleCardHandler, setCloseScheduleCardHandler] = useState(null);
   const modalIdCounter = useRef(0);
 
   const openSidebar = useCallback(() => {
@@ -48,6 +50,19 @@ export function UIProvider({ children }) {
     return `${prefix}-${modalIdCounter.current}-${Date.now()}`;
   }, []);
 
+  const openScheduleCard = useCallback((closeHandler) => {
+    setScheduleCardOpen(true);
+    setCloseScheduleCardHandler(() => closeHandler);
+  }, []);
+
+  const closeScheduleCard = useCallback(() => {
+    if (closeScheduleCardHandler) {
+      closeScheduleCardHandler();
+    }
+    setScheduleCardOpen(false);
+    setCloseScheduleCardHandler(null);
+  }, [closeScheduleCardHandler]);
+
   const hasOpenModals = modalStack.length > 0;
 
   return (
@@ -60,7 +75,10 @@ export function UIProvider({ children }) {
       popModal,
       removeModal,
       generateModalId,
-      hasOpenModals
+      hasOpenModals,
+      scheduleCardOpen,
+      openScheduleCard,
+      closeScheduleCard
     }}>
       {children}
     </UIContext.Provider>

@@ -3,6 +3,7 @@ import { formatDate } from '@/utils/dateFormatter';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import FloatingScheduleCard from '@/components/equipment/FloatingScheduleCard';
 import SwipeableListItem from '@/components/shared/SwipeableListItem';
+import { useUIContext } from '@/context/UIContext';
 
 export default function EquipmentList({ 
   filteredEquipmentEntries, 
@@ -20,6 +21,7 @@ export default function EquipmentList({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const { openScheduleCard, closeScheduleCard: contextCloseScheduleCard } = useUIContext();
 
   const toggleMonth = (key) => {
     setCollapsedMonths(prev => ({ ...prev, [key]: !prev[key] }));
@@ -75,6 +77,18 @@ export default function EquipmentList({
     }
   }, [highlightId, filteredEquipmentEntries]);
 
+  // Register/unregister schedule card with UIContext for back button handling
+  useEffect(() => {
+    if (scheduleOpen) {
+      openScheduleCard(() => {
+        setScheduleOpen(false);
+        setTimeout(() => setSelectedEquipment(null), 300);
+      });
+    } else {
+      contextCloseScheduleCard();
+    }
+  }, [scheduleOpen, openScheduleCard, contextCloseScheduleCard]);
+
   const totalDeductible = filteredEquipmentEntries.reduce((sum, entry) => sum + (entry.deductibleAmount || 0), 0);
 
   // Render a single equipment entry
@@ -85,9 +99,23 @@ export default function EquipmentList({
         itemId={entry.id}
         className="rounded-2xl bg-card/80 backdrop-blur-sm border border-border/30"
         hasReceipt={!!entry.receiptFileName}
-        onEdit={() => onEdit && onEdit(entry)}
+        onEdit={() => {
+          // Auto-close schedule card when opening edit form (issue #56)
+          if (scheduleOpen) {
+            setScheduleOpen(false);
+            setTimeout(() => setSelectedEquipment(null), 300);
+          }
+          onEdit && onEdit(entry);
+        }}
         onDelete={() => setDeleteConfirmation({ isOpen: true, entry })}
-        onViewReceipt={() => handleViewReceipt(entry.receiptFileName)}
+        onViewReceipt={() => {
+          // Auto-close schedule card when opening receipt viewer (issue #56)
+          if (scheduleOpen) {
+            setScheduleOpen(false);
+            setTimeout(() => setSelectedEquipment(null), 300);
+          }
+          handleViewReceipt(entry.receiptFileName);
+        }}
         onSchedule={() => {
           if (scheduleOpen && selectedEquipment?.id !== entry.id) {
             // Switch equipment - card will transition automatically

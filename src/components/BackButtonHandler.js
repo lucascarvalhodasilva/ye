@@ -7,9 +7,18 @@ import { useUIContext } from '@/context/UIContext';
  * Must be used within UIProvider
  */
 export default function BackButtonHandler() {
-  const { hasOpenModals, popModal, sidebarOpen, closeSidebar } = useUIContext();
+  const { 
+    scheduleCardOpen, 
+    closeScheduleCard, 
+    hasOpenModals, 
+    popModal, 
+    sidebarOpen, 
+    closeSidebar 
+  } = useUIContext();
 
   useBackButton({
+    scheduleCardOpen,
+    closeScheduleCard,
     hasOpenModals,
     closeTopModal: popModal,
     sidebarOpen,
