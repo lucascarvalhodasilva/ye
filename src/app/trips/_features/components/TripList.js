@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { formatDate } from '@/utils/dateFormatter';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import SwipeableListItem from '@/components/shared/SwipeableListItem';
@@ -19,6 +19,51 @@ export default function TripList({
   const [deleteConfirmation, setDeleteConfirmation] = useState({ isOpen: false, entry: null });
   const [collapsedMonths, setCollapsedMonths] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAddTooltip, setShowAddTooltip] = useState(false);
+  const addButtonRef = useRef(null);
+  const tooltipRef = useRef(null);
+  const [tooltipStyle, setTooltipStyle] = useState({});
+
+  const hasOngoingTrip = useMemo(() =>
+    tripEntries.some(entry => entry.isOngoing && new Date(entry.date).getFullYear() === selectedYear),
+  [tripEntries, selectedYear]);
+
+  // Hide tooltip when clicking outside
+  useEffect(() => {
+    if (!showAddTooltip) return;
+    const handleClickOutside = (e) => {
+      if (tooltipRef.current && tooltipRef.current.contains(e.target)) return;
+      if (addButtonRef.current && addButtonRef.current.contains(e.target)) return;
+      setShowAddTooltip(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showAddTooltip]);
+
+  // Position tooltip to avoid viewport overflow
+  useEffect(() => {
+    if (!showAddTooltip) return;
+    const placeTooltip = () => {
+      const btn = addButtonRef.current;
+      const tooltip = tooltipRef.current;
+      if (!btn || !tooltip) return;
+
+      const btnRect = btn.getBoundingClientRect();
+      const tooltipWidth = tooltip.offsetWidth || 300;
+      const viewportWidth = window.innerWidth;
+      const padding = 16;
+
+      let left = btnRect.left + btnRect.width / 2 - tooltipWidth / 2;
+      left = Math.max(padding, Math.min(left, viewportWidth - tooltipWidth - padding));
+      const top = btnRect.bottom + 8;
+
+      setTooltipStyle({ left: `${left}px`, top: `${top}px` });
+    };
+
+    placeTooltip();
+    window.addEventListener('resize', placeTooltip);
+    return () => window.removeEventListener('resize', placeTooltip);
+  }, [showAddTooltip]);
 
   const toggleMonth = (key) => {
     setCollapsedMonths(prev => ({ ...prev, [key]: !prev[key] }));
@@ -77,6 +122,7 @@ export default function TripList({
   // Render a single trip entry
   const renderTripEntry = (entry) => {
     const isMultiDay = entry.endDate && entry.endDate !== entry.date;
+    const isOngoing = entry.isOngoing;
     
     const relatedMileage = mileageEntries.filter(m => m.relatedTripId === entry.id);
     const dayMileage = relatedMileage.length > 0
@@ -129,6 +175,11 @@ export default function TripList({
                 <span className="text-sm font-medium text-foreground truncate">
                   {entry.destination || entry.purpose || 'Dienstreise'}
                 </span>
+                {isOngoing && (
+                  <span className="text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-200 px-2 py-0.5 rounded-full font-medium shrink-0">
+                    Laufend
+                  </span>
+                )}
                 {isMultiDay && (
                   <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium shrink-0">
                     {Math.ceil((new Date(entry.endDate) - new Date(entry.date)) / (1000 * 60 * 60 * 24))} {Math.ceil((new Date(entry.endDate) - new Date(entry.date)) / (1000 * 60 * 60 * 24)) === 1 ? 'Nacht' : 'Nächte'}
@@ -149,17 +200,17 @@ export default function TripList({
 
             {/* Amount */}
             <div className="flex flex-col items-end gap-1 shrink-0">
-              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
-                +{totalDeductible.toFixed(2)} €
+              <span className={`text-base font-bold ${isOngoing ? 'text-amber-600 dark:text-amber-300' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                {isOngoing ? 'Offen' : `+${totalDeductible.toFixed(2)} €`}
               </span>
               
               <div className="flex items-center gap-1">
-                {(entry.deductible || 0) > 0 && (
+                {(entry.deductible || 0) > 0 && !isOngoing && (
                   <span className="text-[9px] text-muted-foreground">
                     V: {(entry.deductible || 0).toFixed(0)}€
                   </span>
                 )}
-                {mileageSum > 0 && (
+                {mileageSum > 0 && !isOngoing && (
                   <span className="text-[9px] text-muted-foreground">
                     F: {mileageSum.toFixed(0)}€
                   </span>
@@ -216,12 +267,30 @@ export default function TripList({
           </svg>
         </button>
         {onAddTrip && (
-          <button 
-            onClick={onAddTrip}
-            className="h-12 px-5 rounded-xl bg-primary !text-white transition-all shadow-sm flex items-center justify-center text-base font-medium"
-          >
-            Hinzufügen
-          </button>
+          <div className="relative inline-flex">
+            <button 
+              ref={addButtonRef}
+              type="button"
+              aria-disabled={hasOngoingTrip}
+              onClick={() => {
+                if (hasOngoingTrip) {
+                  setShowAddTooltip(true);
+                } else {
+                  onAddTrip();
+                }
+              }}
+              className={`h-12 px-5 rounded-xl transition-all shadow-sm flex items-center justify-center text-base font-medium ${hasOngoingTrip ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-70' : 'bg-primary !text-white hover:bg-primary/90'}`}
+            >
+              Hinzufügen
+            </button>
+            <div
+              ref={tooltipRef}
+              style={tooltipStyle}
+              className={`fixed whitespace-normal w-[300px] max-w-[calc(100vw-32px)] rounded-lg bg-white text-gray-900 px-3 py-2 text-xs shadow-xl transition-all duration-200 z-[9999] ${showAddTooltip ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'}`}
+            >
+              Beende die laufende Reise, um eine neue zu starten.
+            </div>
+          </div>
         )}
       </div>
 

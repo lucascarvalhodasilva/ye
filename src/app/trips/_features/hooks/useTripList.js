@@ -57,8 +57,11 @@ export const useTripList = () => {
   };
 
   const tripEntriesSorted = useMemo(() => 
-    tripEntries
-      .sort((a, b) => new Date(b.date) - new Date(a.date)), 
+    [...tripEntries].sort((a, b) => {
+      if (a.isOngoing && !b.isOngoing) return -1;
+      if (!a.isOngoing && b.isOngoing) return 1;
+      return new Date(b.date) - new Date(a.date);
+    }), 
   [tripEntries]);
 
   const handleDeleteEntry = (entryId, entryDate, entryEndDate) => {

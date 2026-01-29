@@ -274,84 +274,102 @@ export const useTripForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Validation: Date and Time
       const startDate = formData.date;
-      const endDate = formData.endDate || formData.date;
+      const endDateInput = formData.endDate || formData.date;
+      const startTime = formData.startTime;
+      const endTime = formData.endTime;
+      const isOngoing = !endTime;
 
-      if (!startDate || !formData.startTime || !formData.endTime) {
-        setSubmitError("Bitte Start- und Endzeitraum vollständig und gültig angeben.");
+      const hasOtherOngoing = tripEntries.some(entry => entry.isOngoing && (!editingId || entry.id !== editingId));
+      if (!editingId && hasOtherOngoing) {
+        setSubmitError('Es läuft bereits eine Reise. Bitte beende diese, bevor du eine neue startest.');
         setIsSubmitting(false);
         return;
       }
 
-      if (endDate < startDate) {
-        setSubmitError("Bitte Start- und Endzeitraum vollständig und gültig angeben.");
+      if (!startDate || !startTime) {
+        setSubmitError("Bitte Startdatum und Startzeit angeben.");
         setIsSubmitting(false);
         return;
       }
 
-      if (startDate === endDate && formData.endTime <= formData.startTime) {
-        setSubmitError("Die Endzeit muss nach der Startzeit liegen.");
-        setIsSubmitting(false);
-        return;
+      // Validation for completed trips
+      let finalEndDate = endDateInput;
+      if (!isOngoing) {
+        if (finalEndDate < startDate) {
+          setSubmitError("Bitte Start- und Endzeitraum vollständig und gültig angeben.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        if (startDate === finalEndDate && endTime <= startTime) {
+          setSubmitError("Die Endzeit muss nach der Startzeit liegen.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Auto-detect overnight if end time is before start time on same day
+        if (startTime > endTime && (!formData.endDate || formData.endDate === formData.date)) {
+          const d = new Date(formData.date);
+          d.setDate(d.getDate() + 1);
+          finalEndDate = d.toISOString().split('T')[0];
+        }
       }
 
-      // Validation: Minimum 8 hours duration for allowance eligibility
-      const tripStart = new Date(`${startDate}T${formData.startTime}`);
-      let tripEndDate = endDate;
-      // If end time is before start time on same day, assume next day
-      if (startDate === endDate && formData.endTime <= formData.startTime) {
-        const nextDay = new Date(startDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        tripEndDate = nextDay.toISOString().split('T')[0];
+      // Check for overlapping trips (only when we have an end time)
+      if (!isOngoing) {
+        const newStart = new Date(`${formData.date}T${startTime}`);
+        const newEnd = new Date(`${finalEndDate}T${endTime}`);
+
+        const hasOverlap = tripEntries.some(entry => {
+          if (editingId && entry.id === editingId) return false;
+          const entryEndDate = entry.endDate || entry.date;
+          const entryStart = new Date(`${entry.date}T${entry.startTime}`);
+          const entryEnd = new Date(`${entryEndDate}T${entry.endTime}`);
+
+          return newStart < entryEnd && newEnd > entryStart;
+        });
+
+        if (hasOverlap) {
+          setSubmitError('Fehler: Diese Reise überschneidet sich mit einem bereits existierenden Eintrag.');
+          setIsSubmitting(false);
+          return;
+        }
       }
-      const tripEnd = new Date(`${tripEndDate}T${formData.endTime}`);
-      const durationInHours = (tripEnd - tripStart) / (1000 * 60 * 60);
-    
-    if (durationInHours < 8) {
-      setSubmitError("Die Reisedauer muss mindestens 8 Stunden betragen, um eine Pauschale zu erhalten.");
-      return;
-    }
 
-    // Validation: Public Transport Receipt
-    if (formData.commute.public_transport.active) {
-      const cost = parseFloat(formData.commute.public_transport.cost);
-      if (cost > 0 && !tempPublicTransportReceiptPath) {
-        setSubmitError("Bitte Beleg für Öffi-Ticket hochladen.");
-        return;
+      // Validation: Minimum 8 hours duration for allowance eligibility (only for completed trips)
+      let duration = null;
+      let rate = 0;
+      let deductible = 0;
+
+      if (!isOngoing) {
+        const tripStart = new Date(`${startDate}T${startTime}`);
+        const tripEnd = new Date(`${finalEndDate}T${endTime}`);
+        const durationInHours = (tripEnd - tripStart) / (1000 * 60 * 60);
+
+        if (durationInHours < 8) {
+          setSubmitError("Die Reisedauer muss mindestens 8 Stunden betragen, um eine Pauschale zu erhalten.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const allowance = calculateAllowance(formData.date, startTime, finalEndDate, endTime, taxRates);
+        duration = allowance.duration;
+        rate = allowance.rate;
+        deductible = Math.max(0, rate - parseFloat(formData.employerExpenses));
       }
-    }
-    
-    // Auto-detect overnight if end time is before start time on same day
-    let finalEndDate = formData.endDate || formData.date;
-    if (formData.startTime > formData.endTime && (!formData.endDate || formData.endDate === formData.date)) {
-       const d = new Date(formData.date);
-       d.setDate(d.getDate() + 1);
-       finalEndDate = d.toISOString().split('T')[0];
-    }
 
-    // Check for overlapping trips
-    const newStart = new Date(`${formData.date}T${formData.startTime}`);
-    const newEnd = new Date(`${finalEndDate}T${formData.endTime}`);
+      // Validation: Public Transport Receipt (skip for ongoing trips)
+      if (!isOngoing && formData.commute.public_transport.active) {
+        const cost = parseFloat(formData.commute.public_transport.cost);
+        if (cost > 0 && !tempPublicTransportReceiptPath) {
+          setSubmitError("Bitte Beleg für Öffi-Ticket hochladen.");
+          setIsSubmitting(false);
+          return;
+        }
+      }
 
-    const hasOverlap = tripEntries.some(entry => {
-      if (editingId && entry.id === editingId) return false;
-      const entryEndDate = entry.endDate || entry.date;
-      const entryStart = new Date(`${entry.date}T${entry.startTime}`);
-      const entryEnd = new Date(`${entryEndDate}T${entry.endTime}`);
-
-      return newStart < entryEnd && newEnd > entryStart;
-    });
-
-    if (hasOverlap) {
-      setSubmitError('Fehler: Diese Reise überschneidet sich mit einem bereits existierenden Eintrag.');
-      return;
-    }
-
-    const { duration, rate } = calculateAllowance(formData.date, formData.startTime, finalEndDate, formData.endTime, taxRates);
-    const deductible = Math.max(0, rate - parseFloat(formData.employerExpenses));
-
-    const tripId = editingId || Date.now();
+      const tripId = editingId || Date.now();
 
     // If editing: remove existing trip + related mileage entries first
     if (editingId) {
@@ -364,14 +382,16 @@ export const useTripForm = () => {
     addTripEntry({
       ...formData,
       id: tripId,
-      endDate: finalEndDate,
+      endDate: isOngoing ? '' : finalEndDate,
+      endTime: isOngoing ? '' : formData.endTime,
       duration,
       rate,
-      deductible: parseFloat(deductible.toFixed(2))
+      deductible: parseFloat(deductible.toFixed(2)),
+      isOngoing
     });
 
-    // Auto-add station trips for active modes
-    if (autoAddStationTrips) {
+    // Auto-add station trips for active modes (only for completed trips)
+    if (!isOngoing && autoAddStationTrips) {
       const modes = ['car', 'motorcycle', 'bike'];
       
       modes.forEach(mode => {
@@ -411,8 +431,8 @@ export const useTripForm = () => {
       });
     }
 
-    // Add Public Transport / Ticket Entry
-    if (formData.commute.public_transport.active) {
+    // Add Public Transport / Ticket Entry (only for completed trips)
+    if (!isOngoing && formData.commute.public_transport.active) {
       const ticketCost = parseFloat(formData.commute.public_transport.cost);
       if (ticketCost > 0) {
         let receiptFileName = null;
