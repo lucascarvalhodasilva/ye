@@ -3,6 +3,7 @@ import { useAppContext } from '@/context/AppContext';
 import { calculateAllowance } from '../utils/tripCalculations';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+import { validateFile } from '@/utils/fileValidation';
 
 /**
  * Default commute configuration
