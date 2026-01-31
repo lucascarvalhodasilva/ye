@@ -374,17 +374,16 @@ export const useTripForm = () => {
         const tripStart = new Date(`${startDate}T${startTime}`);
         const tripEnd = new Date(`${finalEndDate}T${endTime}`);
         const durationInHours = (tripEnd - tripStart) / (1000 * 60 * 60);
-
         if (durationInHours < 8) {
-          setSubmitError("Die Reisedauer muss mindestens 8 Stunden betragen, um eine Pauschale zu erhalten.");
-          setIsSubmitting(false);
-          return;
+          duration = durationInHours;
+          rate = 0;
+          deductible = 0;
+        } else {
+          const allowance = calculateAllowance(formData.date, startTime, finalEndDate, endTime, taxRates);
+          duration = allowance.duration;
+          rate = allowance.rate;
+          deductible = Math.max(0, rate - parseFloat(formData.employerExpenses));
         }
-
-        const allowance = calculateAllowance(formData.date, startTime, finalEndDate, endTime, taxRates);
-        duration = allowance.duration;
-        rate = allowance.rate;
-        deductible = Math.max(0, rate - parseFloat(formData.employerExpenses));
       }
 
       const hasPublicTransportReceipt = !!tempPublicTransportReceiptPath;
@@ -401,14 +400,7 @@ export const useTripForm = () => {
         ticketCost = parseFloat(formData.commute.public_transport.cost);
       }
 
-      // Validation: Public Transport Receipt (skip for ongoing trips)
-      if (!isOngoing && formData.commute.public_transport.active) {
-        if (ticketCost > 0 && !hasPublicTransportReceipt) {
-          setSubmitError("Bitte Beleg für Öffi-Ticket hochladen.");
-          setIsSubmitting(false);
-          return;
-        }
-      }
+      // Receipt is optional; only validate cost if a receipt was provided
 
       const sanitizedCommute = sanitizeCommute(formData.commute);
       const tripId = editingId || Date.now();

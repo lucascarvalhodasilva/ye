@@ -101,6 +101,25 @@ export default function TripForm({
     dateRangePickerRef.current?.open(mode);
   };
 
+  const getDurationHours = () => {
+    if (!formData.date || !formData.startTime || !formData.endTime) return null;
+    const endDate = formData.endDate || formData.date;
+    const start = new Date(`${formData.date}T${formData.startTime}`);
+    let end = new Date(`${endDate}T${formData.endTime}`);
+
+    if (formData.date === endDate && formData.startTime > formData.endTime) {
+      end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    const diff = (end - start) / (1000 * 60 * 60);
+    return Number.isFinite(diff) && diff > 0 ? diff : null;
+  };
+
+  const isShortTrip = (() => {
+    const duration = getDurationHours();
+    return duration !== null && duration < 8;
+  })();
+
   return (
     <div 
       className={`rounded-2xl border border-border/50 bg-card/95 backdrop-blur-md shadow-2xl overflow-hidden transition-all duration-300 max-h-[80vh] flex flex-col ${isFlashing ? 'ring-2 ring-primary/50' : ''}`} 
@@ -349,6 +368,17 @@ export default function TripForm({
           )}
         </div>
       </form>
+
+      {isShortTrip && (
+        <div className="px-4 pb-2 shrink-0 border-t border-border/50 pt-3 bg-transparent">
+          <div className="p-3 rounded-xl bg-amber-100 dark:bg-amber-200/20 border border-amber-300 dark:border-amber-500/40 flex items-start gap-2">
+            <svg className="w-4 h-4 text-amber-900 dark:text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xs text-amber-950 dark:text-amber-500">Hinweis: Reisen unter 8 Stunden erhalten keine Pauschale.</p>
+          </div>
+        </div>
+      )}
 
       {/* Error Message - Sticky above button */}
       {submitError && (
