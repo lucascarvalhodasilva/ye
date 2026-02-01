@@ -125,35 +125,61 @@ export default function BackupSettings() {
         zip.file('backup.json', JSON.stringify(backupData, null, 2));
 
         // Add receipts from Documents/receipts/ (if available)
+        let receiptsAdded = 0;
         try {
+          console.log('Attempting to read receipts directory...');
           const dir = await Filesystem.readdir({
             path: 'receipts',
             directory: Directory.Documents
           });
-          const files = dir.files || (Array.isArray(dir) ? dir : []);
-          console.log('Found receipts:', files.length, files);
+          console.log('Readdir response:', dir);
+          
+          // Handle different response formats from Filesystem API
+          let files = [];
+          if (Array.isArray(dir)) {
+            files = dir;
+          } else if (dir.files && Array.isArray(dir.files)) {
+            files = dir.files;
+          } else if (typeof dir === 'object' && dir.files) {
+            files = Array.isArray(dir.files) ? dir.files : Object.values(dir.files);
+          }
+          
+          console.log('Processed files array:', files.length, 'items');
           
           if (files && files.length > 0) {
             for (const f of files) {
-              const name = typeof f === 'string' ? f : f.name;
-              if (!name) continue;
+              // Extract filename from various formats
+              const name = typeof f === 'string' ? f : (f.name || f.path);
+              if (!name) {
+                console.warn('Could not extract filename from:', f);
+                continue;
+              }
               
               try {
+                console.log('Reading receipt file:', name);
                 const file = await Filesystem.readFile({
                   path: `receipts/${name}`,
                   directory: Directory.Documents
                 });
-                // file.data is base64 string
-                zip.file(`receipts/${name}`, file.data, { base64: true });
-                console.log('Added receipt to backup:', name);
+                if (file && file.data) {
+                  zip.file(`receipts/${name}`, file.data, { base64: true });
+                  receiptsAdded++;
+                  console.log('✓ Added receipt to backup:', name);
+                } else {
+                  console.error('File data is empty or invalid for:', name);
+                }
               } catch (readErr) {
-                console.error(`Could not add receipt ${name} to backup:`, readErr);
+                console.error(`✗ Could not add receipt ${name} to backup:`, readErr);
               }
             }
+          } else {
+            console.log('No receipt files found in receipts directory');
           }
         } catch (dirErr) {
-          console.warn('Could not read receipts directory:', dirErr);
+          console.error('Could not read receipts directory:', dirErr);
         }
+        
+        console.log('Total receipts added to backup:', receiptsAdded);
 
         const zipBase64 = await zip.generateAsync({ type: 'base64' });
         const fileName = BackupService.generateFileName();
