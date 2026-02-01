@@ -120,7 +120,6 @@ export default function BackupSettings() {
       } else {
         // Native platform (Android/iOS)
         const zip = new JSZip();
-        let sharedSuccessfully = false;
 
         // Add backup.json using the service
         zip.file('backup.json', JSON.stringify(backupData, null, 2));
@@ -154,47 +153,16 @@ export default function BackupSettings() {
         const zipBase64 = await zip.generateAsync({ type: 'base64' });
         const fileName = BackupService.generateFileName();
 
-        // Datei nur temporär (Cache) ablegen, damit Nutzer den Zielort über Share wählt
+        // Save backup directly to Documents directory (user-accessible location)
         const zipResult = await Filesystem.writeFile({
-          path: fileName,
+          path: `FleetProTax/${fileName}`,
           data: zipBase64,
-          directory: Directory.Cache,
+          directory: Directory.Documents,
           recursive: true
         });
 
-        // Share-Sheet öffnen, damit Nutzer Ziel wählen kann; danach temporäre Datei entfernen
-        try {
-          const uriResult = await Filesystem.getUri({
-            path: fileName,
-            directory: Directory.Cache
-          });
-          const shareResult = await Share.share({
-            title: 'Backup speichern',
-            text: 'Backup-Archiv teilen oder extern ablegen.',
-            url: uriResult.uri
-          });
-          if (shareResult && shareResult.activityType) {
-            sharedSuccessfully = true;
-          }
-        } catch (shareErr) {
-          console.warn('Share nicht möglich, temporäres Backup im Cache abgelegt:', shareErr);
-        } finally {
-          try {
-            await Filesystem.deleteFile({
-              path: fileName,
-              directory: Directory.Cache
-            });
-          } catch (deleteErr) {
-            console.warn('Temporäre Backup-Datei konnte nicht gelöscht werden:', deleteErr);
-          }
-        }
-        
-        if (sharedSuccessfully) {
-          setBackupStatus('success');
-          setTimeout(() => setBackupStatus(null), 3000);
-        } else {
-          setBackupStatus(null);
-        }
+        setBackupStatus('success');
+        setTimeout(() => setBackupStatus(null), 3000);
       }
     } catch (error) {
       console.error('Backup failed:', error);
@@ -509,7 +477,7 @@ export default function BackupSettings() {
 
           {backupStatus === 'success' && (
             <span className="text-green-500 text-sm font-medium animate-in fade-in slide-in-from-left-2">
-              ✓ Backup erfolgreich erstellt
+              ✓ Backup erfolgreich erstellt{!Capacitor.isNativePlatform() ? '' : ' (Dokumente/FleetProTax/)'}
             </span>
           )}
           
