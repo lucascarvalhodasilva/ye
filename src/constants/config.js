@@ -13,7 +13,6 @@ export const ENABLE_MOCK_DATA = process.env.NODE_ENV === 'development';
  */
 export const STORAGE_KEYS = {
   TRIP_ENTRIES: 'mealEntries',
-  MILEAGE_ENTRIES: 'mileageEntries',
   EQUIPMENT_ENTRIES: 'equipmentEntries',
   EXPENSE_ENTRIES: 'expenseEntries',
   MONTHLY_EMPLOYER_EXPENSES: 'monthlyEmployerExpenses',

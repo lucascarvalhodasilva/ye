@@ -11,7 +11,6 @@ import { useAppContext } from '@/context/AppContext';
 export const useMonthlyTaxData = (year) => {
   const { 
     tripEntries, 
-    mileageEntries, 
     equipmentEntries, 
     monthlyEmployerExpenses,
     taxRates 
@@ -27,14 +26,12 @@ export const useMonthlyTaxData = (year) => {
         return date.getMonth() + 1 === month && date.getFullYear() === year;
       });
       
-      const monthMileage = mileageEntries.filter(m => {
-        const date = new Date(m.date);
-        return date.getMonth() + 1 === month && date.getFullYear() === year;
-      });
-      
-      // Calculate totals
-      const tripsDeductible = monthTrips.reduce((sum, t) => sum + (t.mealAllowance || 0), 0);
-      const mileageDeductible = monthMileage.reduce((sum, m) => sum + (m.allowance || 0), 0);
+      // Calculate totals from trips (includes meal allowances and transport allowances)
+      const tripsDeductible = monthTrips.reduce((sum, t) => {
+        const mealAllowance = t.mealAllowance || 0;
+        const transportSum = t.sumTransportAllowances || 0;
+        return sum + mealAllowance + transportSum;
+      }, 0);
       
       // Calculate equipment depreciation for this month
       const equipmentDeductible = calculateMonthlyEquipmentDepreciation(
@@ -45,7 +42,7 @@ export const useMonthlyTaxData = (year) => {
       );
       
       // Calculate gross deductible
-      const grossDeductible = tripsDeductible + mileageDeductible + equipmentDeductible;
+      const grossDeductible = tripsDeductible + equipmentDeductible;
       
       // Get spesen for this month
       const monthSpesen = (monthlyEmployerExpenses || []).find(
@@ -63,7 +60,7 @@ export const useMonthlyTaxData = (year) => {
         net: netDeductible
       };
     });
-  }, [tripEntries, mileageEntries, equipmentEntries, monthlyEmployerExpenses, year, taxRates]);
+  }, [tripEntries, equipmentEntries, monthlyEmployerExpenses, year, taxRates]);
 
   return monthlyData;
 };

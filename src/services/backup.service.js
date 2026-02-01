@@ -1,16 +1,16 @@
 /**
  * Backup Service
  * Handles backup creation, parsing, validation and import for FleetProTax
- * Version: 2.0.0
+ * Version: 1.0.0 - Initial release with nested transportRecords architecture
  */
 
 import { Capacitor } from '@capacitor/core';
 import JSZip from 'jszip';
 
 // App version - should match package.json
-const APP_VERSION = '1.0.0';
-const BACKUP_VERSION = '2.0.0';
-const BACKUP_FORMAT = 'fleetprotax-backup-v2';
+const APP_VERSION = '1.0.0'; // Initial release with nested transportRecords
+const BACKUP_VERSION = '1.0.0'; // Matches APP_VERSION
+const BACKUP_FORMAT = 'fleetprotax-backup-v1';
 
 /**
  * Get current platform
@@ -38,23 +38,32 @@ export const generateFileName = (date = new Date()) => {
 };
 
 /**
- * Calculate metadata from backup data
+ * Calculate metadata from backup data (v1.0.0 - nested transportRecords)
  * @param {Object} data - Backup data object
- * @returns {Object} Metadata object
+ * @param {Array} data.trips - Trips with nested transportRecords
+ * @param {Array} data.equipment - Equipment entries
+ * @param {Array} data.expenses - Expense entries
+ * @returns {Object} Metadata object with counts and date ranges
  */
 const calculateMetadata = (data) => {
   const trips = data.trips || [];
-  const mileage = data.mileage || [];
   const equipment = data.equipment || [];
   const expenses = data.expenses || [];
   
-  const totalEntries = trips.length + mileage.length + equipment.length + expenses.length;
+  // Count total entries including nested transportRecords
+  let transportRecordsCount = 0;
+  trips.forEach(trip => {
+    if (trip.transportRecords && Array.isArray(trip.transportRecords)) {
+      transportRecordsCount += trip.transportRecords.length;
+    }
+  });
+  
+  const totalEntries = trips.length + transportRecordsCount + equipment.length + expenses.length;
   
   // Calculate date range from all entries with dates
   const allDates = [
     ...trips.map(t => t.date).filter(Boolean),
     ...trips.map(t => t.endDate).filter(Boolean),
-    ...mileage.map(m => m.date).filter(Boolean),
     ...equipment.map(e => e.date).filter(Boolean),
     ...expenses.map(e => e.date).filter(Boolean)
   ].sort();
@@ -64,11 +73,18 @@ const calculateMetadata = (data) => {
     end: allDates[allDates.length - 1]
   } : null;
   
-  // Count receipts
+  // Count receipts (including nested transport receipts)
+  let transportReceiptsCount = 0;
+  trips.forEach(trip => {
+    if (trip.transportRecords && Array.isArray(trip.transportRecords)) {
+      transportReceiptsCount += trip.transportRecords.filter(t => t.receiptFileName).length;
+    }
+  });
+  
   const receiptsCount = 
     equipment.filter(e => e.receiptFileName).length +
     expenses.filter(e => e.receiptFileName).length +
-    mileage.filter(m => m.receiptFileName).length;
+    transportReceiptsCount;
   
   return {
     totalEntries,
@@ -79,18 +95,28 @@ const calculateMetadata = (data) => {
 };
 
 /**
- * Create backup data structure (v2.0.0)
+ * Create backup data structure (v1.0.0 - nested transportRecords)
+ * 
+ * Data Structure:
+ * - trips: Array of trip objects
+ *   - id, destination, date, endDate, startTime, endTime
+ *   - mealAllowance: CALCULATED from departureTime to returnTime
+ *   - transportRecords: NESTED array of transport entries
+ *     - id, distance, date, vehicleType, allowance, receiptFileName, purpose
+ *   - sumTransportAllowances: PRECOMPUTED sum of transport allowances
+ * - equipment: Array of equipment purchases
+ * - expenses: Array of business expenses
+ * - settings: Application settings (taxRates, commute defaults, etc.)
+ * 
  * @param {Object} params - Backup parameters
- * @param {Array} params.trips - Trip entries (renamed from mealEntries)
- * @param {Array} params.mileage - Mileage entries
- * @param {Array} params.equipment - Equipment entries
- * @param {Array} params.expenses - Expense entries
- * @param {Object} params.settings - Settings object
- * @returns {Object} Backup data structure
+ * @param {Array} params.trips - Business trip entries with nested transportRecords
+ * @param {Array} params.equipment - Equipment purchase entries
+ * @param {Array} params.expenses - Business expense entries
+ * @param {Object} params.settings - Application settings
+ * @returns {Object} Backup data structure with v1.0.0 format identifier
  */
 export const createBackupData = ({
   trips = [],
-  mileage = [],
   equipment = [],
   expenses = [],
   settings = {}
@@ -110,44 +136,41 @@ export const createBackupData = ({
     },
     data: {
       trips,
-      mileage,
       equipment,
       expenses,
       settings
     },
-    metadata: calculateMetadata({ trips, mileage, equipment, expenses })
+    metadata: calculateMetadata({ trips, equipment, expenses })
   };
   
   return backupData;
 };
 
 /**
- * Validate backup data structure
+ * Validate backup data structure (v1.0.0 only)
  * @param {Object} data - Parsed backup data
- * @returns {Object} { isValid: boolean, errors: string[] }
+ * @returns {Object} { isValid: boolean, errors: string[], version: string }
  */
 export const validateBackup = (data) => {
   const errors = [];
   
   if (!data) {
     errors.push('Backup-Daten sind leer oder ungültig');
-    return { isValid: false, errors };
+    return { isValid: false, errors, version: 'unknown' };
   }
   
-  // Check for v2 structure
+  // Check for backup structure
   if (!data.backup || !data.backup.version) {
     errors.push('Backup-Version fehlt');
+    return { isValid: false, errors, version: 'unknown' };
   }
   
-  // Check backup version
+  // Get backup version
   const version = data.backup?.version;
-  if (version !== BACKUP_VERSION) {
-    errors.push(`Inkompatible Backup-Version: ${version} (erwartet: ${BACKUP_VERSION})`);
-  }
   
-  // Check format
-  if (data.backup?.format !== BACKUP_FORMAT) {
-    errors.push(`Ungültiges Backup-Format: ${data.backup?.format}`);
+  // Only accept v1.0.0
+  if (version !== '1.0.0') {
+    errors.push(`Inkompatible Backup-Version: ${version} (erwartet: 1.0.0)`);
   }
   
   // Check app structure
@@ -158,21 +181,21 @@ export const validateBackup = (data) => {
   // Check data structure
   if (!data.data) {
     errors.push('Backup enthält keine Daten');
+    return { isValid: false, errors, version };
   }
   
-  // Validate data fields exist (they can be empty arrays)
-  if (data.data) {
-    const requiredFields = ['trips', 'mileage', 'equipment', 'expenses', 'settings'];
-    requiredFields.forEach(field => {
-      if (!(field in data.data)) {
-        errors.push(`Pflichtfeld fehlt: ${field}`);
-      }
-    });
-  }
+  // Validate required data fields exist (they can be empty arrays)
+  const requiredFields = ['trips', 'equipment', 'expenses', 'settings'];
+  requiredFields.forEach(field => {
+    if (!(field in data.data)) {
+      errors.push(`Pflichtfeld fehlt: ${field}`);
+    }
+  });
   
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
+    version
   };
 };
 

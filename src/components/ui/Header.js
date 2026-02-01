@@ -10,7 +10,6 @@ export default function Header() {
     setSelectedYear, 
     getAvailableYears,
     tripEntries = [],
-    mileageEntries = [],
     expenseEntries = [],
     equipmentEntries = [],
     taxRates
@@ -90,21 +89,9 @@ export default function Header() {
 
   // Calculate totals
   const tripTotal = filteredTripEntries.reduce((sum, entry) => {
-    const relatedMileage = mileageEntries.filter(m => m.relatedTripId === entry.id);
-    const dayMileage = relatedMileage.length > 0
-      ? relatedMileage
-      : mileageEntries.filter(m => m.date === entry.date || m.date === entry.endDate);
-    
-    const tripTo = dayMileage.find(m => m.purpose && m.purpose.includes('Beginn'));
-    const tripFrom = dayMileage.find(m => m.purpose && m.purpose.includes('Ende'));
-    const amountTo = tripTo ? tripTo.allowance : 0;
-    const amountFrom = tripFrom ? tripFrom.allowance : 0;
-    
-    const publicTransportEntries = dayMileage.filter(m => m.vehicleType === 'public_transport');
-    const publicTransportSum = publicTransportEntries.reduce((s, m) => s + (m.allowance || 0), 0);
-    
-    const mileageSum = amountTo + amountFrom + publicTransportSum;
-    return sum + (entry.mealAllowance || 0) + mileageSum;
+    const mealAllowance = entry.mealAllowance || 0;
+    const transportSum = entry.sumTransportAllowances || 0;
+    return sum + mealAllowance + transportSum;
   }, 0);
 
   const expenseTotal = filteredExpenseEntries.reduce((sum, entry) => sum + (entry.amount || 0), 0);

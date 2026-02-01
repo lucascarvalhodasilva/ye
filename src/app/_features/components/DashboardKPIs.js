@@ -63,8 +63,7 @@ const KPIItem = ({ icon, label, value, variant = 'default', onClick }) => {
  * @typedef {Object} DashboardKPIsProps
  * @property {number} selectedYear - The currently selected tax year
  * @property {number} grandTotal - Total tax-deductible amount
- * @property {number} totalTrips - Total trip allowance (Verpflegungsmehraufwand)
- * @property {number} totalMileage - Total mileage/travel costs (Fahrtkosten)
+ * @property {number} totalTrips - Total trip costs (Verpflegung + Fahrtkosten)
  * @property {number} totalEquipment - Total work equipment costs (Arbeitsmittel)
  * @property {number} totalEmployerReimbursement - Total employer reimbursements (Spesen)
  * @property {number} totalExpenses - Total private expenses
@@ -82,8 +81,7 @@ const KPIItem = ({ icon, label, value, variant = 'default', onClick }) => {
  * <DashboardKPIs
  *   selectedYear={2025}
  *   grandTotal={5000}
- *   totalTrips={1200}
- *   totalMileage={2500}
+ *   totalTrips={3700}
  *   totalEquipment={800}
  *   totalEmployerReimbursement={500}
  *   totalExpenses={300}
@@ -94,7 +92,6 @@ export default function DashboardKPIs({
   selectedYear, 
   grandTotal, 
   totalTrips, 
-  totalMileage, 
   totalEquipment, 
   totalEmployerReimbursement, 
   totalExpenses, 
@@ -166,20 +163,11 @@ export default function DashboardKPIs({
         <KPIItem
           icon={
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M3 12h18M3 17h18" />
             </svg>
           }
-          label="Verpflegung"
+          label="Dienstreisen"
           value={`${totalTrips.toFixed(2)} €`}
-        />
-        <KPIItem
-          icon={
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-            </svg>
-          }
-          label="Fahrtkosten"
-          value={`${totalMileage.toFixed(2)} €`}
         />
         <KPIItem
           icon={

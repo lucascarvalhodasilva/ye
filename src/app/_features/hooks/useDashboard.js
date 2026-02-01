@@ -2,17 +2,13 @@ import { useMemo, useState, useEffect } from 'react';
 import { useAppContext } from '@/context/AppContext';
 
 export const useDashboard = () => {
-  const { tripEntries, mileageEntries, equipmentEntries, expenseEntries, monthlyEmployerExpenses, selectedYear, taxRates } = useAppContext();
+  const { tripEntries, equipmentEntries, expenseEntries, monthlyEmployerExpenses, selectedYear, taxRates } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
 
   // Filter entries by selected year
   const filteredTrips = useMemo(() => 
     tripEntries.filter(e => new Date(e.date).getFullYear() === selectedYear),
   [tripEntries, selectedYear]);
-
-  const filteredMileage = useMemo(() => 
-    mileageEntries.filter(e => new Date(e.date).getFullYear() === selectedYear),
-  [mileageEntries, selectedYear]);
 
   const filteredExpenses = useMemo(() => 
     (expenseEntries || []).filter(e => new Date(e.date).getFullYear() === selectedYear),
@@ -23,12 +19,12 @@ export const useDashboard = () => {
   [monthlyEmployerExpenses, selectedYear]);
 
   const totalTrips = useMemo(() => 
-    filteredTrips.reduce((sum, entry) => sum + entry.mealAllowance, 0),
+    filteredTrips.reduce((sum, entry) => {
+      const mealAllowance = entry.mealAllowance || 0;
+      const transportSum = entry.sumTransportAllowances || 0;
+      return sum + mealAllowance + transportSum;
+    }, 0),
   [filteredTrips]);
-
-  const totalMileage = useMemo(() => 
-    filteredMileage.reduce((sum, entry) => sum + entry.allowance, 0),
-  [filteredMileage]);
   
   // Calculate Equipment Depreciation for Selected Year
   const totalEquipment = useMemo(() => equipmentEntries.reduce((sum, entry) => {
@@ -67,8 +63,8 @@ export const useDashboard = () => {
     filteredMonthlyExpenses.reduce((sum, entry) => sum + entry.amount, 0),
   [filteredMonthlyExpenses]);
   
-  // Grand Total (Absetzbar) = (Trips + Mileage + Equipment) - Employer Reimbursements
-  const grandTotal = (totalTrips + totalMileage + totalEquipment) - totalEmployerReimbursement;
+  // Grand Total (Absetzbar) = (Trips + Equipment) - Employer Reimbursements
+  const grandTotal = (totalTrips + totalEquipment) - totalEmployerReimbursement;
 
   // KPI Calculations for Expenses vs Allowances
   const totalExpenses = useMemo(() => 
@@ -79,13 +75,17 @@ export const useDashboard = () => {
   const netTotal = grandTotal - totalExpenses;
 
   // Combine and sort recent activities
-  const recentActivities = useMemo(() => [
-    ...tripEntries.map(e => ({ ...e, type: 'Verpflegung', amount: e.mealAllowance })),
-    ...mileageEntries.map(e => ({ ...e, type: 'Fahrt', amount: e.allowance })),
-    ...equipmentEntries.map(e => ({ ...e, type: 'Arbeitsmittel', amount: e.deductibleAmount }))
-  ]
-  .sort((a, b) => new Date(b.date) - new Date(a.date))
-  .slice(0, 5), [tripEntries, mileageEntries, equipmentEntries]);
+  const recentActivities = useMemo(() => {
+    const activities = [
+      ...tripEntries.map(e => ({ 
+        ...e, 
+        type: 'Reise', 
+        amount: (e.mealAllowance || 0) + (e.sumTransportAllowances || 0) 
+      })),
+      ...equipmentEntries.map(e => ({ ...e, type: 'Arbeitsmittel', amount: e.deductibleAmount }))
+    ];
+    return activities.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  }, [tripEntries, equipmentEntries]);
 
   // Simulate initial data loading (in real app, this would wait for data fetch)
   useEffect(() => {
@@ -101,7 +101,6 @@ export const useDashboard = () => {
     selectedYear,
     grandTotal,
     totalTrips,
-    totalMileage,
     totalEquipment,
     totalEmployerReimbursement,
     totalExpenses,

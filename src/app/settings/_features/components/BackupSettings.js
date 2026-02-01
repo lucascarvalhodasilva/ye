@@ -10,7 +10,6 @@ import BackupService from '@/services/backup.service';
 export default function BackupSettings() {
   const {
     tripEntries,
-    mileageEntries,
     equipmentEntries,
     expenseEntries,
     monthlyEmployerExpenses,
@@ -38,10 +37,9 @@ export default function BackupSettings() {
     setIsBackingUp(true);
     setBackupStatus(null);
 
-    // Create v2.0.0 backup data structure
+    // Create v1.0.0 backup data structure (with nested transportRecords)
     const backupData = BackupService.createBackupData({
       trips: tripEntries,
-      mileage: mileageEntries,
       equipment: equipmentEntries,
       expenses: expenseEntries,
       settings: {
@@ -238,9 +236,14 @@ export default function BackupSettings() {
         .filter(e => e.receiptFileName && new Date(e.date).getFullYear() === year)
         .forEach(e => addRow('Ausgabe', e.description, e.date, e.amount, e.receiptFileName));
 
-      mileageEntries
-        .filter(m => m.receiptFileName && m.vehicleType === 'public_transport' && new Date(m.date).getFullYear() === year)
-        .forEach(m => addRow('Andere', m.purpose || 'ÖPNV', m.date, m.allowance, m.receiptFileName));
+      // Collect transport receipts from nested trip.transportRecords
+      tripEntries.forEach(trip => {
+        if (trip.transportRecords && Array.isArray(trip.transportRecords)) {
+          trip.transportRecords
+            .filter(m => m.receiptFileName && m.vehicleType === 'public_transport' && new Date(m.date).getFullYear() === year)
+            .forEach(m => addRow('Andere', m.purpose || 'ÖPNV', m.date, m.allowance, m.receiptFileName));
+        }
+      });
 
       if (rows.length <= 1) {
         setExportStatus({ type: 'error', message: 'Keine Belege für dieses Jahr gefunden.' });

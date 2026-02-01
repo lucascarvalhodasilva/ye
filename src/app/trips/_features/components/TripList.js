@@ -7,7 +7,6 @@ import FullScreenTableView from './FullScreenTableView';
 
 export default function TripList({ 
   tripEntries, 
-  mileageEntries, 
   handleDeleteEntry, 
   selectedYear, 
   setIsFullScreen, 
@@ -125,24 +124,14 @@ export default function TripList({
     const isMultiDay = entry.endDate && entry.endDate !== entry.date;
     const isOngoing = entry.isOngoing;
     
-    const relatedMileage = mileageEntries.filter(m => m.relatedTripId === entry.id);
-    const dayMileage = relatedMileage.length > 0
-      ? relatedMileage
-      : mileageEntries.filter(m => m.date === entry.date || m.date === entry.endDate);
-
-    const tripTo = dayMileage.find(m => m.purpose && m.purpose.includes('Beginn'));
-    const tripFrom = dayMileage.find(m => m.purpose && m.purpose.includes('Ende'));
+    // Use nested transportRecords instead of filtering mileageEntries
+    const transportRecords = entry.transportRecords || [];
+    const transportSum = entry.sumTransportAllowances || 0;
     
-    const amountTo = tripTo ? tripTo.allowance : 0;
-    const amountFrom = tripFrom ? tripFrom.allowance : 0;
-    
-    const publicTransportEntries = dayMileage.filter(m => m.vehicleType === 'public_transport');
-    const publicTransportSum = publicTransportEntries.reduce((sum, m) => sum + (m.allowance || 0), 0);
-    
-    const mileageSum = amountTo + amountFrom + publicTransportSum;
-    const totalMealAllowance = (entry.mealAllowance || 0) + mileageSum;
+    const totalMealAllowance = (entry.mealAllowance || 0) + transportSum;
     
     // Check if this entry has a receipt
+    const publicTransportEntries = transportRecords.filter(m => m.vehicleType === 'public_transport');
     const hasReceipt = publicTransportEntries.some(m => m.receiptFileName);
     const receiptEntry = publicTransportEntries.find(m => m.receiptFileName);
 
@@ -212,9 +201,9 @@ export default function TripList({
                     V: {(entry.mealAllowance || 0).toFixed(0)}€
                   </span>
                 )}
-                {mileageSum > 0 && !isOngoing && (
+                {transportSum > 0 && !isOngoing && (
                   <span className="text-[9px] text-muted-foreground">
-                    F: {mileageSum.toFixed(0)}€
+                    F: {transportSum.toFixed(0)}€
                   </span>
                 )}
               </div>
@@ -231,7 +220,6 @@ export default function TripList({
         isOpen={isFullScreen}
         onClose={() => setIsFullScreen(false)}
         tripEntries={tripEntries}
-        mileageEntries={mileageEntries}
         selectedYear={selectedYear}
       />
 
@@ -351,11 +339,7 @@ export default function TripList({
         onClose={() => setDeleteConfirmation({ isOpen: false, entry: null })}
         onConfirm={() => {
           if (deleteConfirmation.entry) {
-            handleDeleteEntry(
-              deleteConfirmation.entry.id, 
-              deleteConfirmation.entry.date, 
-              deleteConfirmation.entry.endDate
-            );
+            handleDeleteEntry(deleteConfirmation.entry.id);
           }
         }}
         title="Eintrag löschen"

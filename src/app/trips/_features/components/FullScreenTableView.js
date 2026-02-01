@@ -12,16 +12,8 @@ const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli'
  * @property {string} endTime - End time
  * @property {number} duration - Duration in hours
  * @property {number} mealAllowance - Meal allowance amount
- */
-
-/**
- * @typedef {Object} MileageEntry
- * @property {number|string} id - Unique identifier
- * @property {string} date - Entry date
- * @property {number} [allowance] - Mileage allowance amount
- * @property {string} [vehicleType] - Type of vehicle used
- * @property {number|string} [relatedTripId] - Related trip entry ID
- * @property {string} [purpose] - Trip purpose
+ * @property {Array} [transportRecords] - Nested transport records
+ * @property {number} [sumTransportAllowances] - Precomputed transport cost sum
  */
 
 /**
@@ -29,31 +21,19 @@ const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli'
  * @property {boolean} isOpen - Whether the view is open
  * @property {Function} onClose - Function to close the view
  * @property {TripEntry[]} tripEntries - Trip entries for the selected year
- * @property {MileageEntry[]} mileageEntries - All mileage entries
  * @property {string|number} selectedYear - Currently selected year
  */
 
 /**
- * Calculates total meal allowance for an entry including mileage
+ * Calculates total meal allowance for an entry including transport costs
  */
-function calculateEntryTotal(entry, mileageEntries) {
-  const relatedMileage = mileageEntries.filter(m => m.relatedTripId === entry.id);
-  const dayMileage = relatedMileage.length > 0
-    ? relatedMileage
-    : mileageEntries.filter(m => m.date === entry.date || m.date === entry.endDate);
-
-  const tripTo = dayMileage.find(m => m.purpose && m.purpose.includes('Beginn'));
-  const tripFrom = dayMileage.find(m => m.purpose && m.purpose.includes('Ende'));
-  const publicTransportEntries = dayMileage.filter(m => m.vehicleType === 'public_transport');
-  
-  const amountTo = tripTo ? tripTo.allowance : 0;
-  const amountFrom = tripFrom ? tripFrom.allowance : 0;
-  const publicTransportSum = publicTransportEntries.reduce((acc, m) => acc + (m.allowance || 0), 0);
-  const mileageSum = amountTo + amountFrom + publicTransportSum;
+function calculateEntryTotal(entry) {
+  // With nested structure, transport sum is precomputed
+  const transportSum = entry.sumTransportAllowances || 0;
   
   return {
-    mileageSum,
-    totalMealAllowance: entry.mealAllowance + mileageSum
+    mileageSum: transportSum, // Keep name for compatibility
+    totalMealAllowance: entry.mealAllowance + transportSum
   };
 }
 
@@ -68,7 +48,6 @@ export default function FullScreenTableView({
   isOpen, 
   onClose, 
   tripEntries, 
-  mileageEntries, 
   selectedYear 
 }) {
   const [collapsedMonths, setCollapsedMonths] = useState({});
@@ -93,7 +72,7 @@ export default function FullScreenTableView({
   // Calculate totals per month
   const monthlyTotals = Object.keys(entriesByMonth).reduce((acc, month) => {
     acc[month] = entriesByMonth[month].reduce((sum, entry) => {
-      const { totalMealAllowance } = calculateEntryTotal(entry, mileageEntries);
+      const { totalMealAllowance } = calculateEntryTotal(entry);
       return sum + totalMealAllowance;
     }, 0);
     return acc;
@@ -102,7 +81,7 @@ export default function FullScreenTableView({
   // Calculate mileage totals per month
   const monthlyMileageTotals = Object.keys(entriesByMonth).reduce((acc, month) => {
     acc[month] = entriesByMonth[month].reduce((sum, entry) => {
-      const { mileageSum } = calculateEntryTotal(entry, mileageEntries);
+      const { mileageSum } = calculateEntryTotal(entry);
       return sum + mileageSum;
     }, 0);
     return acc;
@@ -117,12 +96,12 @@ export default function FullScreenTableView({
   }, {});
 
   const totalSum = tripEntries.reduce((sum, entry) => {
-    const { totalMealAllowance } = calculateEntryTotal(entry, mileageEntries);
+    const { totalMealAllowance } = calculateEntryTotal(entry);
     return sum + totalMealAllowance;
   }, 0);
 
   const totalMileage = tripEntries.reduce((sum, entry) => {
-    const { mileageSum } = calculateEntryTotal(entry, mileageEntries);
+    const { mileageSum } = calculateEntryTotal(entry);
     return sum + mileageSum;
   }, 0);
 
@@ -240,7 +219,7 @@ export default function FullScreenTableView({
                       
                       {/* Month Entries */}
                       {!isCollapsed && monthEntries.map((entry, idx) => {
-                        const { mileageSum, totalMealAllowance } = calculateEntryTotal(entry, mileageEntries);
+                        const { mileageSum, totalMealAllowance } = calculateEntryTotal(entry);
                         const isMultiDay = entry.endDate && entry.endDate !== entry.date;
                         const rowNumber = monthEntries.indexOf(entry) + 1;
 

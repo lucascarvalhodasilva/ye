@@ -70,7 +70,6 @@ export default function TripsPage() {
 
   const { 
     tripEntries, 
-    mileageEntries, 
     handleDeleteEntry, 
     selectedYear,
     viewingReceipt,
@@ -120,7 +119,6 @@ export default function TripsPage() {
         <div className="flex flex-col flex-1 min-h-0">
           <TripList 
             tripEntries={tripEntries}
-            mileageEntries={mileageEntries}
             handleDeleteEntry={handleDeleteEntry}
             selectedYear={selectedYear}
             setIsFullScreen={setIsFullScreen}

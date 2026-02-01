@@ -10,8 +10,6 @@ export const useTripList = () => {
   const { 
     tripEntries, 
     deleteTripEntry, 
-    mileageEntries, 
-    deleteMileageEntry, 
     selectedYear 
   } = useAppContext();
 
@@ -64,26 +62,14 @@ export const useTripList = () => {
     }), 
   [tripEntries]);
 
-  const handleDeleteEntry = (entryId, entryDate, entryEndDate) => {
+  const handleDeleteEntry = (entryId) => {
+    // Transport records are nested within the trip entry
+    // deleteTripEntry will handle deletion of receipt files from transportRecords
     deleteTripEntry(entryId);
-    
-    // Delete by relatedTripId
-    const relatedMileage = mileageEntries.filter(m => m.relatedTripId === entryId);
-    if (relatedMileage.length > 0) {
-      relatedMileage.forEach(m => deleteMileageEntry(m.id));
-    } else {
-      // Fallback for legacy entries
-      const legacyMileage = mileageEntries.filter(m => 
-        !m.relatedTripId && 
-        (m.date === entryDate || (entryEndDate && m.date === entryEndDate))
-      );
-      legacyMileage.forEach(m => deleteMileageEntry(m.id));
-    }
   };
 
   return {
     tripEntries: tripEntriesSorted,
-    mileageEntries,
     handleDeleteEntry,
     selectedYear,
     viewingReceipt,
