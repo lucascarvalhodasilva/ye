@@ -3,6 +3,7 @@ import { formatDate } from '@/utils/dateFormatter';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import PDFViewer from '@/components/shared/PDFViewerDynamic';
 import SwipeableListItem from '@/components/shared/SwipeableListItem';
+import ReceiptBadge from '@/components/shared/ReceiptBadge';
 import FullScreenTableView from './FullScreenTableView';
 
 export default function ExpenseList({ 
@@ -106,9 +107,12 @@ export default function ExpenseList({
 
             {/* Expense Details */}
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-foreground truncate block">
-                {entry.description || 'Ausgabe'}
-              </span>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-sm font-medium text-foreground truncate">
+                  {entry.description || 'Ausgabe'}
+                </span>
+                {entry.receiptFileName && <ReceiptBadge />}
+              </div>
               
               <span className="text-xs text-muted-foreground">{formatDate(entry.date)}</span>
             </div>

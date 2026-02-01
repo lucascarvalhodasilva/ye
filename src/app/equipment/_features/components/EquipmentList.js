@@ -3,6 +3,7 @@ import { formatDate } from '@/utils/dateFormatter';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import FloatingScheduleCard from './FloatingScheduleCard';
 import SwipeableListItem from '@/components/shared/SwipeableListItem';
+import ReceiptBadge from '@/components/shared/ReceiptBadge';
 import { useUIContext } from '@/context/UIContext';
 import FullScreenTableView from './FullScreenTableView';
 
@@ -136,9 +137,12 @@ export default function EquipmentList({
 
             {/* Equipment Details */}
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-foreground truncate block">
-                {entry.name || 'Arbeitsmittel'}
-              </span>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-sm font-medium text-foreground truncate">
+                  {entry.name || 'Arbeitsmittel'}
+                </span>
+                {entry.receiptFileName && <ReceiptBadge />}
+              </div>
               
               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                 <span>{formatDate(entry.date)}</span>

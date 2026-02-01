@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { formatDate } from '@/utils/dateFormatter';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import SwipeableListItem from '@/components/shared/SwipeableListItem';
+import ReceiptBadge from '@/components/shared/ReceiptBadge';
 import FullScreenTableView from './FullScreenTableView';
 
 export default function TripList({ 
@@ -175,6 +176,7 @@ export default function TripList({
                 <span className="text-sm font-medium text-foreground truncate">
                   {entry.destination || entry.purpose || 'Dienstreise'}
                 </span>
+                {hasReceipt && <ReceiptBadge />}
                 {isOngoing && (
                   <span className="text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-200 px-2 py-0.5 rounded-full font-medium shrink-0">
                     Laufend
